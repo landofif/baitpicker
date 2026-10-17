@@ -130,24 +130,11 @@ th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line-soft)}
           <p class="group">Options</p>
           <div class="checks">
             <label><input id="lures" type="checkbox" checked> Lures</label>
-            <label><input id="onlystock" type="checkbox"> Only my stock</label>
             <label><input id="bigger" type="checkbox"> Adult/Large incl. bigger</label>
           </div>
         </div></details>
-        <details id="stockbox"><summary>My stock (<span id="stockn">0</span>)</summary><div class="body">
-          <p class="note">Tick owned, then "Only my stock". Saved in browser.</p>
-          <div class="checks" id="stock"></div>
-        </div></details>
-        <details><summary>Catches needed</summary><div class="body">
-          <p class="note" id="reqnote"></p>
-          <div class="reqgrid" id="reqs"></div>
-        </div></details>
-        <details><summary>Odds</summary><div class="body">
-          <p class="group" style="margin-top:0">Size</p>
-          <div class="scroll"><table id="sizes"></table></div>
-          <p class="group">Rarity, no bait</p>
-          <div class="scroll"><table id="rar"></table></div>
-        </div></details>
+        <div hidden><p class="note" id="reqnote"></p>
+          <div class="reqgrid" id="reqs"></div></div>
       </div>
     </aside>
 
@@ -222,13 +209,11 @@ const QUESTS=["Adult","Large","Rare","Epic","Legendary"];
 const QX={Rare:1,Epic:2,Legendary:3};
 
 const tiersOn=()=>{const o={};document.querySelectorAll(".tier").forEach(c=>o[c.dataset.t]=c.checked);return o;};
-let stock=new Set();try{stock=new Set(JSON.parse(localStorage.getItem("baitstock")||'["Crankbait (Tiger Craw / Smokin\' Shad)"]'));}catch(e){stock=new Set(["Crankbait (Tiger Craw / Smokin' Shad)"]);}
-const saveStock=()=>{try{localStorage.setItem("baitstock",JSON.stringify([...stock]));}catch(e){}};
 function candidates(loc,luck,X,lures){
-  const T=tiersOn(), only=$("onlystock").checked;
+  const T=tiersOn();
   const base=odds(luck)[X];const rows=[];
   for(const b of D.baits){
-    if(!usable(b,loc)||b.lik===0) continue; if(!lures&&b.kind==="lure") continue; if(!T[b.rar]) continue; if(only&&!stock.has(b.name)) continue;
+    if(!usable(b,loc)||b.lik===0) continue; if(!lures&&b.kind==="lure") continue; if(!T[b.rar]) continue;
     const {cnt,names}=pool(b,loc); if(!cnt.some(n=>n)) continue;
     const o=outcome(cnt,b.lik,luck);
     rows.push({b,cnt,names,fl:o.fl[X],ce:o.ce[X],mid:(o.fl[X]+o.ce[X])/2,base});
@@ -296,17 +281,10 @@ function render(){
   const more=$("more");
   if(shown.length>12){more.hidden=false;more.textContent=state.showAll?"Top 12":`All ${shown.length}`;more.onclick=()=>{state.showAll=!state.showAll;render();};}else more.hidden=true;
 
-  // tables
-  $("sizes").innerHTML="<tr><th>Size</th>"+["Baby","Juvenile","Adult","Large","Gigantic"].map(x=>`<th>${x}</th>`).join("")+"</tr><tr><td>%</td>"+so.map(x=>`<td>${pct1(x)}</td>`).join("")+"</tr>";
-  $("rar").innerHTML="<tr><th>Rarity</th>"+RN.map(x=>`<th>${x}</th>`).join("")+"</tr><tr><td>%</td>"+ro.map(x=>`<td>${pct1(x)}</td>`).join("")+"</tr>";
 }
 $("loc").innerHTML=D.locs.map(l=>`<option value="${l.name}">${l.name} (${l.level})</option>`).join("");
 $("loc").value="Hawaii";
-const names=[...new Set(D.baits.map(b=>b.name))].sort();
-$("stock").innerHTML=names.map(n=>`<label><input class="st" type="checkbox" value="${n.replace(/"/g,'&quot;')}"${stock.has(n)?" checked":""}> ${n}</label>`).join("");
-const upd=()=>{$("stockn").textContent=stock.size;};upd();
-document.querySelectorAll(".st").forEach(c=>c.addEventListener("input",()=>{c.checked?stock.add(c.value):stock.delete(c.value);saveStock();upd();state.showAll=false;render();}));
-document.querySelectorAll(".tier,#onlystock").forEach(c=>c.addEventListener("input",()=>{state.showAll=false;render();}));
+document.querySelectorAll(".tier").forEach(c=>c.addEventListener("input",()=>{state.showAll=false;render();}));
 buildReqs();
 for(const id of ["loc","luck","scale","lures","bigger","lvl"]) $(id).addEventListener("input",()=>{state.showAll=false;render();});
 render();
