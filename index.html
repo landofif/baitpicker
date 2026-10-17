@@ -129,7 +129,6 @@ th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line-soft)}
           <p class="group">Options</p>
           <div class="checks">
             <label><input id="lures" type="checkbox" checked> Lures</label>
-            <label><input id="bigger" type="checkbox"> Adult/Large incl. bigger</label>
           </div>
         </div></details>
       </div>
@@ -218,7 +217,7 @@ function candidates(loc,luck,X,lures){
 
 function render(){
   const loc=D.locs.find(l=>l.name===$("loc").value), luck=+$("luck").value, scale=+$("scale").value;
-  const lures=$("lures").checked, bigger=$("bigger").checked;
+  const lures=$("lures").checked, bigger=false;
   $("luckv").textContent=luck; $("scalev").textContent=scale;
   const lvl=15;
   const req={};for(const q of QUESTS) req[q]=modelReq(q,lvl);
@@ -275,7 +274,7 @@ function render(){
 $("loc").innerHTML=D.locs.map(l=>`<option value="${l.name}">${l.name} (${l.level})</option>`).join("");
 $("loc").value="Hawaii";
 document.querySelectorAll(".tier").forEach(c=>c.addEventListener("input",()=>{state.showAll=false;render();}));
-for(const id of ["loc","luck","scale","lures","bigger"]) $(id).addEventListener("input",()=>{state.showAll=false;render();});
+for(const id of ["loc","luck","scale","lures"]) $(id).addEventListener("input",()=>{state.showAll=false;render();});
 render();
 </script>
 
