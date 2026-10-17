@@ -115,7 +115,6 @@ th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line-soft)}
       <div class="field"><label class="row" for="loc">Location</label><select id="loc"></select></div>
       <div class="field"><label class="row" for="luck"><span>Luck</span><span class="val" id="luckv"></span></label><input id="luck" type="range" min="0" max="2500" step="25" value="1000"></div>
       <div class="field"><label class="row" for="scale"><span>Scale</span><span class="val" id="scalev"></span></label><input id="scale" type="range" min="0" max="3500" step="25" value="800"></div>
-      <div class="field"><label class="row" for="lvl"><span>Level</span><span class="val" id="lvlv"></span></label><input id="lvl" type="range" min="1" max="20" step="1" value="15"></div>
 
       <div>
         <details open><summary>Filters</summary><div class="body">
@@ -133,8 +132,6 @@ th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line-soft)}
             <label><input id="bigger" type="checkbox"> Adult/Large incl. bigger</label>
           </div>
         </div></details>
-        <div hidden><p class="note" id="reqnote"></p>
-          <div class="reqgrid" id="reqs"></div></div>
       </div>
     </aside>
 
@@ -199,12 +196,6 @@ let state={quest:"Epic",showAll:false};
 const XPCAP=31.62, xpMax=l=>Math.min(XPCAP,21.714+0.2093*l+0.0266*l*l);
 const KCAT={Epic:[0.553,1.2],Rare:[1.303,1.2],Adult:[3.665,0.92],Large:[2.675,0.92],Legendary:[0.738,1]};
 const modelReq=(q,l)=>KCAT[q]?Math.min(q==="Legendary"?20:1e9,Math.round(KCAT[q][0]*Math.pow(xpMax(l),KCAT[q][1]))):"";
-const touched={};
-function buildReqs(){
-  $("reqs").innerHTML=["Adult","Large","Rare","Epic","Legendary"].map(q=>`<label class="field" for="req_${q}"><span>${q}</span><input id="req_${q}" type="number" min="1" step="1" placeholder="amount"></label>`).join("");
-  ["Adult","Large","Rare","Epic","Legendary"].forEach(q=>$("req_"+q).addEventListener("input",()=>{touched[q]=true;render();}));
-}
-function fillReqs(){const l=+$("lvl").value;for(const q of ["Adult","Large","Rare","Epic","Legendary"]) if(!touched[q]) $("req_"+q).value=modelReq(q,l);}
 const QUESTS=["Adult","Large","Rare","Epic","Legendary"];
 const QX={Rare:1,Epic:2,Legendary:3};
 
@@ -229,9 +220,8 @@ function render(){
   const loc=D.locs.find(l=>l.name===$("loc").value), luck=+$("luck").value, scale=+$("scale").value;
   const lures=$("lures").checked, bigger=$("bigger").checked;
   $("luckv").textContent=luck; $("scalev").textContent=scale;
-  const lvl=+$("lvl").value; $("lvlv").textContent=lvl; fillReqs();
-  $("reqnote").textContent=`Hard quest estimates, lvl ${lvl}, ~4% off. Type to override.`;
-  const req={};for(const q of ["Adult","Large","Rare","Epic","Legendary"]){const v=parseFloat($("req_"+q).value);req[q]=v>0?v:NaN;}
+  const lvl=15;
+  const req={};for(const q of QUESTS) req[q]=modelReq(q,lvl);
   const so=sizeOdds(scale), ro=odds(luck);
   const adult=bigger?so[2]+so[3]+so[4]:so[2], large=bigger?so[3]+so[4]:so[3];
 
@@ -246,13 +236,13 @@ function render(){
   const minC=known.length?Math.min(...known.map(q=>casts[q])):0;
   $("cards").innerHTML=QUESTS.map(q=>{
     const d=q==="Adult"||q==="Large"?"any bait":best[q].name;
-    const big=isFinite(casts[q])&&vals[q]>0?`${Math.round(casts[q])} casts`:pct(vals[q]);
-    const sub=isFinite(casts[q])&&vals[q]>0?`${pct(vals[q])}/cast, ${req[q]} catches`:"enter catches";
+    const big=pct(vals[q]);
+    const sub="per cast";
     return `<button class="card${q===top?" top":""}" data-q="${q}" aria-pressed="${q===state.quest}"><span class="k">${q}</span><span class="n">${big}</span><span class="spd"><i style="width:${isFinite(casts[q])&&vals[q]>0&&minC?Math.max(4,minC/casts[q]*100):0}%"></i></span><span class="d">${sub}</span><span class="d">${d}</span></button>`;}).join("");
   // verdict: the answer first
   {const t=top, hasC=isFinite(casts[t])&&vals[t]>0;
    const how=(t==="Adult"||t==="Large")?`no bait, ${pct(vals[t])} of casts`:`<strong>${best[t].name}</strong> @${pct(vals[t])} per cast vs ${pct(ro[QX[t]])} without`;
-   $("verdict").innerHTML=`<div class="eyebrow">Best at ${loc.name}</div><div class="big">${t}${hasC?` <em>~${Math.round(casts[t])}</em> casts`:""}</div><p>${how}</p>`;}
+   $("verdict").innerHTML=`<div class="eyebrow">Best at ${loc.name}</div><div class="big"><em>${t}</em></div><p>${how}</p>`;}
   document.querySelectorAll(".card").forEach(c=>c.onclick=()=>{state.quest=c.dataset.q;state.showAll=false;render();});
 
   // list
@@ -285,8 +275,7 @@ function render(){
 $("loc").innerHTML=D.locs.map(l=>`<option value="${l.name}">${l.name} (${l.level})</option>`).join("");
 $("loc").value="Hawaii";
 document.querySelectorAll(".tier").forEach(c=>c.addEventListener("input",()=>{state.showAll=false;render();}));
-buildReqs();
-for(const id of ["loc","luck","scale","lures","bigger","lvl"]) $(id).addEventListener("input",()=>{state.showAll=false;render();});
+for(const id of ["loc","luck","scale","lures","bigger"]) $(id).addEventListener("input",()=>{state.showAll=false;render();});
 render();
 </script>
 
