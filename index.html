@@ -4,22 +4,22 @@
 <style>
 /* answer first: verdict, then a speed comparison, then the ranked baits. controls live in a sticky rail */
 :root{
-  --bg:#edf2f1; --panel:#f8fbfa; --fg:#10252a; --muted:#566e73; --line:#d3dfde; --line-soft:#e1eae9;
-  --accent:#0b7a75; --accent-soft:#cfeae7; --warm:#b84f08; --warm-soft:#f6dcc8;
-  --bar:#0b7a75; --bar-ceil:#a8d8d4; --good:#1c7c3b;
+  --bg:#fff; --panel:#f4f4f4; --fg:#000; --muted:#666; --line:#cfcfcf; --line-soft:#e6e6e6;
+  --accent:#000; --accent-soft:#e8e8e8; --warm:#000; --warm-soft:#dcdcdc;
+  --bar:#000; --bar-ceil:#bdbdbd; --good:#000;
   --display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
   --body:"IBM Plex Sans",system-ui,sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,monospace;
   --ease:cubic-bezier(.2,.7,.2,1);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0b181b; --panel:#112226; --fg:#e3f0ee; --muted:#8aa5a8; --line:#25414a; --line-soft:#1a3238;
-  --accent:#43c7bd; --accent-soft:#17464a; --warm:#f2995a; --warm-soft:#4a2e1b;
-  --bar:#43c7bd; --bar-ceil:#2a5f62; --good:#6fd18b; color-scheme:dark}}
+  --bg:#000; --panel:#121212; --fg:#fff; --muted:#999; --line:#333; --line-soft:#1f1f1f;
+  --accent:#fff; --accent-soft:#262626; --warm:#fff; --warm-soft:#2e2e2e;
+  --bar:#fff; --bar-ceil:#555; --good:#fff; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0b181b; --panel:#112226; --fg:#e3f0ee; --muted:#8aa5a8; --line:#25414a; --line-soft:#1a3238;
-  --accent:#43c7bd; --accent-soft:#17464a; --warm:#f2995a; --warm-soft:#4a2e1b;
-  --bar:#43c7bd; --bar-ceil:#2a5f62; --good:#6fd18b; color-scheme:dark}
+  --bg:#000; --panel:#121212; --fg:#fff; --muted:#999; --line:#333; --line-soft:#1f1f1f;
+  --accent:#fff; --accent-soft:#262626; --warm:#fff; --warm-soft:#2e2e2e;
+  --bar:#fff; --bar-ceil:#555; --good:#fff; color-scheme:dark}
 *{box-sizing:border-box}
 body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
   padding-inline:16px;padding-block:24px 56px;margin:0}
