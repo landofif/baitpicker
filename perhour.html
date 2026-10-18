@@ -20,7 +20,9 @@
 <div class="sec">Rarity</div><div class="scroll"><table id="rar"></table></div>
 <div class="sec">Size</div><div class="scroll"><table id="siz"></table></div>
 <div class="sec">Shards and pets</div><div class="scroll"><table id="oth"></table></div>
+<div class="sec">Measured in game</div><div class="scroll"><table id="mes"></table></div>
 <p class="foot">Source: FishOnMC wiki, Fishing Stats. Casts per hour = 3600 / (average wait until the particles appear + the seconds after the particles you typed). The wiki's bite speed only covers the wait until the particles. The time from the particles to the actual bite, the minigame length (line strength has no formula) and the recast are not in any formula we have, so that number is yours to set. The average wait assumes the wait is picked evenly between min and max, and the boosts are assumed to add up; neither is stated on the wiki. Rarity and size are rolled once per cast, shards and pets are separate chances per cast. Bait is not counted; it only raises the odds above this (see the bait picker). Fish frenzy adds +100 bite speed, +250 luck, +250 scale, +50 prospect and +25% pet luck (from the server's chat lines).</p>
+<p class="foot">Measured in game: time between catches, from 9,060 "[FoE] Tracking" lines in one player's game logs (2 to 18 October 2026, FOECollab mod). Bite speed and boosts changed over that time and are not in the logs, so use these rows to check your "seconds after particles", not as a formula. The logs only mark the catch, so the wait, the bite and the minigame can't be split apart.</p>
 </div>
 <script src="sheet.js"></script>
 <script>
@@ -49,6 +51,13 @@ function render(){
   const pet=readNum("pl")+(fr?25:0);
   const af=readNum("af"),w=wait(t),avg=(w.max+w.min)/2,per=avg+af,cph=3600/per;
   $("res").innerHTML=table([["Total bite speed",1],["Average wait to particles",1],["Seconds per cast",1],["Casts per hour",1]],[[t,fix(avg)+" s",fix(per,1)+" s",num(cph)]]);
+  $("mes").innerHTML=table([["Source"],["Seconds per catch",1],["Catches per hour",1]],[
+    ["This sheet",fix(per,1)+" s",num(cph)],
+    ["Logs, fishing steadily (gaps up to 1 min)","13.7 s","263"],
+    ["Logs, with short breaks (gaps up to 5 min)","16.2 s","222"],
+    ["Logs, median gap","12 s",""],
+    ["Logs, middle half of gaps","10 to 15 s",""],
+    ["Logs, fastest gaps","5 to 6 s",""]]);
   const row=(n,p)=>[n,pc(p,p<0.001?4:p<0.01?3:2),num(cph*p),every(cph*p)],H=[["",0],["Odds per cast",1],["Per hour",1],["One every",1]];
   $("rar").innerHTML=table([["Rarity"],...H.slice(1)],odds(luck).map((p,i)=>row(RN[i],p)));
   $("siz").innerHTML=table([["Size"],...H.slice(1)],sizeOdds(scale).map((p,i)=>row(SZ[i],p)));
