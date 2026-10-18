@@ -1,0 +1,30 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Bite Speed</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="sheet.css"></head><body>
+<div class="wrap">
+<h1>Bite Speed <span class="hint">FishOnMC wait before a bite</span></h1>
+<table class="inputs" aria-label="Inputs">
+<tr><th scope="row"><label for="bs">Bite speed</label></th><td><input id="bs" type="number" min="0" max="3000" step="10" value="0" inputmode="numeric"></td><td class="hint">0 to 3000, from your pole</td></tr>
+<tr><th scope="row"><label for="wx">Weather</label></th><td><select id="wx"><option value="0">none</option><option value="50">rain shower +50</option><option value="100">thunderstorm +100</option><option value="150">supercell +150</option></select></td></tr>
+<tr><th scope="row"><label for="mn">Moon</label></th><td><select id="mn"><option value="0">none</option><option value="120">full moon +120</option><option value="120">blue moon +120</option><option value="120">super moon +120</option><option value="120">blood moon +120</option></select></td></tr>
+<tr><th scope="row"><label for="ch">Chummer</label></th><td><select id="ch"><option value="0">none</option><option value="75">common +75</option><option value="130">rare +130</option><option value="180">epic +180</option><option value="250">legendary +250</option><option value="375">mythical +375</option></select></td></tr>
+<tr><th scope="row">Frenzy</th><td class="chk"><label><input id="fr" type="checkbox"> fish frenzy +100</label></td></tr>
+</table>
+<div class="scroll"><table id="res"></table></div>
+<div class="sec">Reference</div>
+<div class="scroll"><table id="ref"></table></div>
+<p class="foot">Source: FishOnMC wiki, Fishing Stats. Bite speed is the wait from the bobber hitting the water to the fish particles. Max wait = 20 s - 0.02 s per point, floor 3 s (reached at 850). Min wait = a quarter of the max, 5 s - 0.005 s per point, floor 1.5 s (reached at 700). The boosts are added to your pole value; that they stack by addition is assumed, the wiki does not say. The average assumes the wait is picked evenly between min and max, which is also not stated.</p>
+</div>
+<script src="sheet.js"></script>
+<script>
+
+const wait=t=>({max:Math.max(3,20-0.02*t),min:Math.max(1.5,5-0.005*t)});
+function render(){
+  const base=readNum("bs"),t=base+(+$("wx").value)+(+$("mn").value)+(+$("ch").value)+($("fr").checked?100:0),w=wait(t);
+  $("res").innerHTML=table([["Total bite speed",1],["Max wait",1],["Min wait",1],["Average if even",1]],[[t,fix(w.max)+" s",fix(w.min)+" s",fix((w.max+w.min)/2)+" s"]]);
+  const pts=[...new Set([0,100,200,300,400,500,600,700,800,850,900,1000,1200,1500])].sort((a,b)=>a-b);
+  $("ref").innerHTML=table([["Bite speed",1],["Max wait",1],["Min wait",1],["Average if even",1]],pts.map(p=>{const q=wait(p);return [p,fix(q.max)+" s",fix(q.min)+" s",fix((q.max+q.min)/2)+" s"];}));
+}
+bind(["bs","wx","mn","ch","fr"],render);
+</script>
+</body></html>

@@ -1,0 +1,28 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Luck</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="sheet.css"></head><body>
+<div class="wrap">
+<h1>Luck <span class="hint">FishOnMC rarity odds</span></h1>
+<table class="inputs" aria-label="Inputs">
+<tr><th scope="row"><label for="lk">Luck</label></th><td><input id="lk" type="number" min="0" max="5000" step="25" value="1000" inputmode="numeric"></td><td class="hint">0 to 5000, from armour, pets and the location roll</td></tr>
+<tr><th scope="row">Rainbow</th><td class="chk"><label><input id="rb" type="checkbox"> rainbow event +500</label></td></tr>
+</table>
+<div class="scroll"><table id="res"></table></div>
+<div class="sec">Reference</div>
+<div class="scroll"><table id="ref"></table></div>
+<p class="foot">Source: FishOnMC wiki, Fishing Stats. Raw: common 55 - 0.02 x luck, rare 30 + 0.002 x luck, epic 10 + 0.004 x luck, legendary 4 + 0.006 x luck, mythical 1 + 0.008 x luck, in percent. A rarity that would go below 0 cannot be caught; the odds shown are rescaled so the rest add up to 100%, as the bait picker does. The raw formulas always add up to 100 by themselves.</p>
+</div>
+<script src="sheet.js"></script>
+<script>
+
+const RN=["Common","Rare","Epic","Legendary","Mythical"];
+function odds(l){const p=[55-l*.02,30+l*.002,10+l*.004,4+l*.006,1+l*.008].map(x=>Math.max(0,x));const s=p.reduce((a,b)=>a+b,0);return p.map(x=>x/s);}
+const raw=l=>[55-l*.02,30+l*.002,10+l*.004,4+l*.006,1+l*.008];
+function render(){
+  const l=readNum("lk")+($("rb").checked?500:0),o=odds(l),r=raw(l);
+  $("res").innerHTML=table([["Rarity"],["Raw %",1],["Odds",1],["Per cast",1]],RN.map((n,i)=>[n,fix(r[i],3),pc(o[i]),one(o[i])]));
+  $("ref").innerHTML=table([["Luck",1],...RN.map(n=>[n,1])],[0,250,500,750,1000,1250,1500,2000,2500,3000,4000,5000].map(p=>[p,...odds(p).map(x=>pc(x))]));
+}
+bind(["lk","rb"],render);
+</script>
+</body></html>
