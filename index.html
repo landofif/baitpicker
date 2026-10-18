@@ -8,6 +8,10 @@ body{margin:0;padding:16px;background:var(--bg);color:var(--fg);font:14px/1.4 sy
 .wrap{max-width:1000px;margin:0 auto}
 h1{font-size:16px;margin:0 0 12px;font-weight:600}
 .num,td.n,th.n{font-family:ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+nav{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 14px;font-size:13px}
+nav a{color:var(--muted);text-decoration:none}
+nav a:hover{color:var(--fg)}
+nav a[aria-current]{color:var(--fg);font-weight:600}
 table{border-collapse:collapse;width:100%}
 th,td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
 th{background:var(--head);font-weight:600;white-space:nowrap}
@@ -37,6 +41,7 @@ th.s[aria-sort=descending]::after{content:" \25BC";font-size:10px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
 <div class="wrap">
+<nav><a href="index.html" aria-current=page>Bait picker</a><a href="bite.html">Bite speed</a><a href="reel.html">Reel speed</a><a href="luck.html">Luck</a><a href="scale.html">Scale</a><a href="prospect.html">Prospect</a><a href="petluck.html">Pet luck</a><a href="perhour.html">Per hour</a></nav>
 <h1>Bait Picker <span class="hint">FishOnMC bait odds</span></h1>
 
 <table class="inputs" aria-label="Inputs">
