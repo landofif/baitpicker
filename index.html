@@ -1,154 +1,66 @@
-<!doctype html><html><head><meta charset=utf8><title>Bait Picker</title><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Bait Picker</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-/* answer first: verdict, then a speed comparison, then the ranked baits. controls live in a sticky rail */
-:root{
-  --bg:#fff; --panel:#f4f4f4; --fg:#000; --muted:#666; --line:#cfcfcf; --line-soft:#e6e6e6;
-  --accent:#000; --accent-soft:#e8e8e8; --warm:#000; --warm-soft:#dcdcdc;
-  --bar:#000; --bar-ceil:#bdbdbd; --good:#000;
-  --display:"Bricolage Grotesque","Trebuchet MS",sans-serif;
-  --body:"IBM Plex Sans",system-ui,sans-serif;
-  --mono:"IBM Plex Mono",ui-monospace,monospace;
-  --ease:cubic-bezier(.2,.7,.2,1);
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#000; --panel:#121212; --fg:#fff; --muted:#999; --line:#333; --line-soft:#1f1f1f;
-  --accent:#fff; --accent-soft:#262626; --warm:#fff; --warm-soft:#2e2e2e;
-  --bar:#fff; --bar-ceil:#555; --good:#fff; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --bg:#000; --panel:#121212; --fg:#fff; --muted:#999; --line:#333; --line-soft:#1f1f1f;
-  --accent:#fff; --accent-soft:#262626; --warm:#fff; --warm-soft:#2e2e2e;
-  --bar:#fff; --bar-ceil:#555; --good:#fff; color-scheme:dark}
+:root{color-scheme:light dark;--bg:#fff;--fg:#1a1a1a;--muted:#6b6b6b;--line:#d4d4d4;--head:#f3f3f3;--sel:#e8f0fe;--bad:#c5221f;--cell:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#161616;--fg:#e6e6e6;--muted:#9a9a9a;--line:#3a3a3a;--head:#202020;--sel:#1e2a3d;--bad:#ff6b66;--cell:#161616}}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5;
-  padding-inline:16px;padding-block:24px 56px;margin:0}
-.wrap{max-width:1120px;margin:0 auto;color:var(--fg)}
-header{margin-bottom:24px}
-h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,5vw,40px);margin:0;letter-spacing:-.025em;line-height:1.05;text-wrap:balance}
-.sub{color:var(--muted);margin:8px 0 0;max-width:60ch;text-wrap:pretty}
-.app{display:grid;gap:28px;align-items:start}
-@media (min-width:880px){.app{grid-template-columns:288px minmax(0,1fr);gap:40px}.rail{position:sticky;top:20px}}
-.rail{display:flex;flex-direction:column;gap:20px;min-width:0}
-.main{display:flex;flex-direction:column;gap:28px;min-width:0}
-/* controls */
-.field{display:flex;flex-direction:column;gap:6px;min-width:0}
-.field>.row,.field>span.lab{font-size:13px;font-weight:500;color:var(--muted)}
-.row{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
-.val{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--fg);font-variant-numeric:tabular-nums}
-select,input[type=number]{width:100%;font:inherit;font-size:15px;padding:9px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);min-height:40px}
-input[type=range]{width:100%;accent-color:var(--accent);height:28px;margin:0}
-select:focus-visible,input:focus-visible,summary:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-details{border-top:1px solid var(--line)}
-details>summary{cursor:pointer;padding:12px 0;font-size:14px;font-weight:500;list-style:none;display:flex;justify-content:space-between;align-items:center;min-height:44px}
-details>summary::-webkit-details-marker{display:none}
-details>summary::after{content:"+";font-family:var(--mono);color:var(--muted)}
-details[open]>summary::after{content:"\2212"}
-details>.body{padding-bottom:14px}
-.checks{display:flex;flex-wrap:wrap;gap:4px 14px}
-.checks label{display:flex;align-items:center;gap:7px;font-size:14px;min-height:32px;cursor:pointer}
-.checks input{accent-color:var(--accent);width:16px;height:16px;margin:0}
-.group{font-size:12px;color:var(--muted);margin:10px 0 2px}
-.reqgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.reqgrid .field>span{font-size:13px;color:var(--muted)}
-/* verdict */
-.verdict{padding-block:4px 20px;border-bottom:1px solid var(--line)}
-.verdict .eyebrow{font-size:13px;font-weight:500;color:var(--warm)}
-.verdict .big{font-family:var(--display);font-weight:700;font-size:clamp(30px,6vw,52px);line-height:1.02;letter-spacing:-.03em;margin:6px 0 10px;text-wrap:balance}
-.verdict .big em{font-style:normal;color:var(--accent)}
-.verdict p{margin:0;color:var(--muted);max-width:62ch;text-wrap:pretty}
-.verdict p strong{color:var(--fg);font-weight:600}
-/* quest comparison */
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:8px}
-.card{all:unset;box-sizing:border-box;cursor:pointer;background:var(--panel);border:1px solid var(--line-soft);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:2px;min-width:0;min-height:44px;transition:border-color .15s var(--ease),background-color .15s var(--ease)}
-.card:hover{border-color:var(--line)}
-.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
-.card[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
-.card .k{font-size:13px;font-weight:500;color:var(--muted)}
-.card .n{font-family:var(--display);font-size:30px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:2px}
-.card .d{font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
-.card .spd{height:4px;border-radius:2px;background:var(--line);margin:8px 0 6px;overflow:hidden}
-.card .spd i{display:block;height:100%;background:var(--bar);border-radius:2px;transition:width .2s var(--ease)}
-.card.top .n{color:var(--warm)}
-.card.top .spd i{background:var(--warm)}
-.card.top .k::after{content:" \00b7  best";color:var(--warm)}
-/* ranked list */
-h2{font-family:var(--display);font-size:22px;letter-spacing:-.015em;margin:0 0 4px;line-height:1.2}
-.note{font-size:13.5px;color:var(--muted);margin:0 0 14px;max-width:68ch;text-wrap:pretty}
-.item{display:grid;grid-template-columns:28px minmax(0,1.15fr) minmax(0,1fr);gap:4px 16px;padding:16px 0;border-top:1px solid var(--line-soft)}
-.item:first-of-type{border-top:0}
-.rk{font-family:var(--mono);font-size:13px;color:var(--muted);padding-top:2px}
-.item.first .rk{color:var(--warm);font-weight:600}
-.name{font-weight:600;overflow-wrap:anywhere}
-.item.first .name{font-size:17px}
-.meta{display:flex;flex-wrap:wrap;gap:4px 8px;margin-top:5px;font-size:12.5px;color:var(--muted);align-items:center}
-.chip{font-family:var(--mono);font-size:11.5px;padding:1px 7px;border-radius:99px;background:var(--accent-soft);color:var(--fg)}
-.chip.lure{background:var(--warm-soft)}
-.bar{height:14px;border-radius:4px;background:var(--line-soft);position:relative;overflow:hidden}
-.bar i{position:absolute;left:0;top:0;bottom:0;display:block;transition:width .2s var(--ease)}
-.bar .c{background:var(--bar-ceil)} .bar .f{background:var(--bar)}
-.bar b{position:absolute;top:0;bottom:0;width:2px;background:var(--warm)}
-.nums{display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;margin-top:6px;font-variant-numeric:tabular-nums;gap:8px;flex-wrap:wrap}
-.up{color:var(--good)}
-.fish{grid-column:2/-1;font-size:12.5px;color:var(--muted);overflow-wrap:anywhere}
-.legend{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-bottom:6px}
-.legend span::before{content:"";display:inline-block;width:12px;height:10px;margin-right:6px;border-radius:2px;vertical-align:-1px}
-.legend .a::before{background:var(--bar)} .legend .b::before{background:var(--bar-ceil)} .legend .c::before{background:var(--warm);width:3px}
-.more{margin-top:8px;padding:10px 16px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);font:inherit;cursor:pointer;min-height:44px}
-.more:hover{border-color:var(--accent)}
-table{border-collapse:collapse;width:100%;font-family:var(--mono);font-size:13px;font-variant-numeric:tabular-nums;margin-bottom:14px}
-th,td{padding:7px 8px;text-align:right;border-bottom:1px solid var(--line-soft)} th{font-weight:500;color:var(--muted)} th:first-child,td:first-child{text-align:left}
+body{margin:0;padding:16px;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif}
+.wrap{max-width:1000px;margin:0 auto}
+h1{font-size:16px;margin:0 0 12px;font-weight:600}
+.num,td.n,th.n{font-family:ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+th{background:var(--head);font-weight:600;white-space:nowrap}
+th.n,td.n{text-align:right}
+th.s{cursor:pointer;user-select:none}
+th.s[aria-sort=ascending]::after{content:" \25B2";font-size:10px}
+th.s[aria-sort=descending]::after{content:" \25BC";font-size:10px}
+.inputs{width:auto;margin-bottom:16px}
+.inputs th{width:90px}
+.inputs td{padding:0}
+.inputs input[type=number],.inputs select{width:100%;min-width:200px;border:0;border-radius:0;padding:5px 8px;background:var(--cell);color:var(--fg);font:inherit;height:30px}
+.inputs input:focus,.inputs select:focus{outline:2px solid #1a73e8;outline-offset:-2px}
+.inputs input.bad{background:color-mix(in srgb,var(--bad) 18%,var(--cell));color:var(--bad)}
+.inputs td.chk{padding:5px 8px}
+.inputs td.chk label{margin-right:12px;white-space:nowrap}
+.hint{color:var(--muted);font-size:12px}
+.verdict{margin:0 0 8px}
+.q tbody tr{cursor:pointer}
+.q tbody tr:hover{background:var(--head)}
+.q tbody tr[aria-selected=true]{background:var(--sel)}
+.q tr.top td{font-weight:600}
+.sec{margin:20px 0 6px;font-weight:600}
 .scroll{overflow-x:auto}
-.foot{font-size:12.5px;color:var(--muted);max-width:75ch;margin:0;text-wrap:pretty}
-@media (max-width:560px){.item{grid-template-columns:24px minmax(0,1fr)}.item>div:nth-child(3){grid-column:2}.fish{grid-column:2}}
+.fish{color:var(--muted);font-size:12px}
+.more{margin-top:8px;font:inherit;padding:4px 10px;border:1px solid var(--line);background:var(--head);color:var(--fg);cursor:pointer}
+.foot{color:var(--muted);font-size:12px;max-width:80ch;margin-top:20px}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
-
+</style></head><body>
 <div class="wrap">
-  <header>
-    <h1>Bait Picker</h1>
-    <p class="sub">FishOnMC bait odds</p>
-  </header>
+<h1>Bait Picker <span class="hint">FishOnMC bait odds</span></h1>
 
-  <div class="app">
-    <aside class="rail" aria-label="Controls">
-      <div class="field"><label class="row" for="loc">Location</label><select id="loc"></select></div>
-      <div class="field"><label class="row" for="luck"><span>Luck</span><span class="val" id="luckv"></span></label><input id="luck" type="range" min="0" max="2500" step="25" value="1000"></div>
-      <div class="field"><label class="row" for="scale"><span>Scale</span><span class="val" id="scalev"></span></label><input id="scale" type="range" min="0" max="3500" step="25" value="800"></div>
+<table class="inputs" aria-label="Inputs">
+<tr><th scope="row"><label for="loc">Location</label></th><td><select id="loc"></select></td></tr>
+<tr><th scope="row"><label for="luck">Luck</label></th><td><input id="luck" type="number" min="0" max="2500" step="25" value="1000" inputmode="numeric"></td><td class="hint" style="border:0;padding-left:8px">0 to 2500</td></tr>
+<tr><th scope="row"><label for="scale">Scale</label></th><td><input id="scale" type="number" min="0" max="3500" step="25" value="800" inputmode="numeric"></td><td class="hint" style="border:0;padding-left:8px">0 to 3500</td></tr>
+<tr><th scope="row">Tiers</th><td class="chk">
+<label><input class="tier" data-t="C" type="checkbox" checked> Common</label>
+<label><input class="tier" data-t="R" type="checkbox" checked> Rare</label>
+<label><input class="tier" data-t="E" type="checkbox" checked> Epic</label>
+<label><input class="tier" data-t="L" type="checkbox"> Legendary</label>
+<label><input class="tier" data-t="M" type="checkbox"> Mythical</label></td></tr>
+<tr><th scope="row">Options</th><td class="chk"><label><input id="lures" type="checkbox" checked> Lures</label></td></tr>
+</table>
 
-      <div>
-        <details open><summary>Filters</summary><div class="body">
-          <p class="group">Tiers</p>
-          <div class="checks">
-            <label><input class="tier" data-t="C" type="checkbox" checked> Common</label>
-            <label><input class="tier" data-t="R" type="checkbox" checked> Rare</label>
-            <label><input class="tier" data-t="E" type="checkbox" checked> Epic</label>
-            <label><input class="tier" data-t="L" type="checkbox"> Legendary</label>
-            <label><input class="tier" data-t="M" type="checkbox"> Mythical</label>
-          </div>
-          <p class="group">Options</p>
-          <div class="checks">
-            <label><input id="lures" type="checkbox" checked> Lures</label>
-          </div>
-        </div></details>
-      </div>
-    </aside>
+<p class="verdict" id="verdict" aria-live="polite"></p>
+<div class="scroll"><table class="q" id="cmp" aria-label="Quest comparison"></table></div>
 
-    <main class="main">
-      <section class="verdict" id="verdict" aria-live="polite"></section>
-      <section aria-label="Quest comparison">
-        <div class="cards" id="cards"></div>
-      </section>
-      <section id="listpanel">
-        <h2 id="listtitle"></h2>
-        <p class="note" id="listnote"></p>
-        <div class="legend" id="legend"><span class="a">per cast with bait</span><span class="c">no bait</span></div>
-        <div id="list"></div>
-        <button class="more" id="more" hidden></button>
-      </section>
-      <p class="foot">Source: FishOnMC wiki. Bait applies on its likelihood roll; empty rarity falls to next lower. Roll below pool = normal fish (lower bound). Event fish/baits excluded. Legendary/Mythical off by default (expensive).</p>
-    </main>
-  </div>
+<div class="sec" id="listtitle"></div>
+<p class="hint" id="listnote" style="margin:0 0 6px"></p>
+<div class="scroll"><table id="list"></table></div>
+<button class="more" id="more" hidden></button>
+
+<p class="foot">Source: FishOnMC wiki. Bait applies on its likelihood roll; empty rarity falls to next lower. Roll below pool = normal fish (lower bound). Event fish/baits excluded. Legendary/Mythical off by default (expensive). Odds are shown as a range when the bait's best and worst case differ.</p>
 </div>
 
 <script>
@@ -190,8 +102,7 @@ function outcome(cnt,lik,luck){
   return {fl,ce:fl.slice()};
 }
 const poolStr=c=>c.map((n,i)=>n?n+RL[i]:"").filter(Boolean).join(" ")||"-";
-
-let state={quest:"Epic",showAll:false};
+let state={quest:"Epic",showAll:false,sort:"rk",dir:1};
 const XPCAP=31.62, xpMax=l=>Math.min(XPCAP,21.714+0.2093*l+0.0266*l*l);
 const KCAT={Epic:[0.553,1.2],Rare:[1.303,1.2],Adult:[3.665,0.92],Large:[2.675,0.92],Legendary:[0.738,1]};
 const modelReq=(q,l)=>KCAT[q]?Math.min(q==="Legendary"?20:1e9,Math.round(KCAT[q][0]*Math.pow(xpMax(l),KCAT[q][1]))):"";
@@ -215,67 +126,83 @@ function candidates(loc,luck,X,lures){
   return reps;
 }
 
+// typed number: out of range or empty shows red, the calculation uses the clamped value
+function readNum(id){
+  const el=$(id),lo=+el.min,hi=+el.max,raw=el.value.trim(),v=Number(raw);
+  const ok=raw!==""&&isFinite(v)&&v>=lo&&v<=hi;
+  el.classList.toggle("bad",!ok);
+  return Math.min(hi,Math.max(lo,isFinite(v)&&raw!==""?v:lo));
+}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const COLS=[["rk","#",1],["name","Bait",0],["tier","Tier",0],["lik","Lik %",1],["pool","Pool",0],["odds","Odds",1],["up","+ pts",1],["fish","Fish",0]];
+
+function saveHash(){
+  const p=new URLSearchParams({loc:$("loc").value,luck:$("luck").value,scale:$("scale").value,
+    tiers:RL.filter(t=>document.querySelector(`.tier[data-t=${t}]`).checked).join(""),lures:$("lures").checked?1:0,quest:state.quest});
+  try{history.replaceState(null,"","#"+p);}catch(e){}
+}
+function loadHash(){
+  const p=new URLSearchParams(location.hash.slice(1));
+  if(p.has("loc")&&D.locs.some(l=>l.name===p.get("loc"))) $("loc").value=p.get("loc");
+  if(p.has("luck")) $("luck").value=p.get("luck");
+  if(p.has("scale")) $("scale").value=p.get("scale");
+  if(p.has("tiers")) document.querySelectorAll(".tier").forEach(c=>c.checked=p.get("tiers").includes(c.dataset.t));
+  if(p.has("lures")) $("lures").checked=p.get("lures")==="1";
+  if(QUESTS.includes(p.get("quest"))) state.quest=p.get("quest");
+}
+
 function render(){
-  const loc=D.locs.find(l=>l.name===$("loc").value), luck=+$("luck").value, scale=+$("scale").value;
-  const lures=$("lures").checked, bigger=false;
-  $("luckv").textContent=luck; $("scalev").textContent=scale;
+  const loc=D.locs.find(l=>l.name===$("loc").value), luck=readNum("luck"), scale=readNum("scale");
+  const lures=$("lures").checked;
   const lvl=15;
   const req={};for(const q of QUESTS) req[q]=modelReq(q,lvl);
   const so=sizeOdds(scale), ro=odds(luck);
-  const adult=bigger?so[2]+so[3]+so[4]:so[2], large=bigger?so[3]+so[4]:so[3];
+  const adult=so[2], large=so[3];
 
-  // comparison cards
   const best={};
   for(const q of ["Rare","Epic","Legendary"]){const c=candidates(loc,luck,QX[q],lures);const base=ro[QX[q]];
-    best[q]=c.length&&c[0].mid>base+.0005?{val:c[0].mid,name:c[0].b.name,fl:c[0].fl,ce:c[0].ce}:{val:base,name:"no bait beats the base odds",fl:base,ce:base};}
+    best[q]=c.length&&c[0].mid>base+.0005?{val:c[0].mid,name:c[0].b.name}:{val:base,name:"no bait beats the base odds"};}
   const vals={Adult:adult,Large:large,Rare:best.Rare.val,Epic:best.Epic.val,Legendary:best.Legendary.val};
   const casts={};for(const q of QUESTS) casts[q]=req[q]/vals[q];
   const known=QUESTS.filter(q=>isFinite(casts[q])&&vals[q]>0);
   const top=known.length?known.reduce((a,b)=>casts[b]<casts[a]?b:a):Object.keys(vals).reduce((a,b)=>vals[b]>vals[a]?b:a);
-  const minC=known.length?Math.min(...known.map(q=>casts[q])):0;
-  $("cards").innerHTML=QUESTS.map(q=>{
-    const d=q==="Adult"||q==="Large"?"any bait":best[q].name;
-    const big=pct(vals[q]);
-    const sub="per cast";
-    return `<button class="card${q===top?" top":""}" data-q="${q}" aria-pressed="${q===state.quest}"><span class="k">${q}</span><span class="n">${big}</span><span class="spd"><i style="width:${isFinite(casts[q])&&vals[q]>0&&minC?Math.max(4,minC/casts[q]*100):0}%"></i></span><span class="d">${sub}</span><span class="d">${d}</span></button>`;}).join("");
-  // verdict: the answer first
-  {const t=top, hasC=isFinite(casts[t])&&vals[t]>0;
-   const how=(t==="Adult"||t==="Large")?`no bait, ${pct(vals[t])} of casts`:`<strong>${best[t].name}</strong> @${pct(vals[t])} per cast vs ${pct(ro[QX[t]])} without`;
-   $("verdict").innerHTML=`<div class="eyebrow">Best at ${loc.name}</div><div class="big"><em>${t}</em></div><p>${how}</p>`;}
-  document.querySelectorAll(".card").forEach(c=>c.onclick=()=>{state.quest=c.dataset.q;state.showAll=false;render();});
 
-  // list
+  const how=(top==="Adult"||top==="Large")?"no bait":best[top].name;
+  $("verdict").innerHTML=`Fastest quest at ${esc(loc.name)}: <strong>${top}</strong> (${esc(how)}, ${pct(vals[top])} per cast)`;
+
+  $("cmp").innerHTML=`<thead><tr><th>Quest</th><th class="n">Needed</th><th class="n">Per cast</th><th class="n">Casts</th><th>Bait</th></tr></thead><tbody>`+
+    QUESTS.map(q=>`<tr data-q="${q}" tabindex="0" aria-selected="${q===state.quest}"${q===top?' class="top"':""}><td>${q}</td><td class="n">${req[q]}</td><td class="n">${pct(vals[q])}</td><td class="n">${isFinite(casts[q])?Math.round(casts[q]):"-"}</td><td>${q==="Adult"||q==="Large"?"any bait":esc(best[q].name)}</td></tr>`).join("")+`</tbody>`;
+  document.querySelectorAll("#cmp tbody tr").forEach(r=>{
+    const pick=()=>{state.quest=r.dataset.q;state.showAll=false;render();};
+    r.onclick=pick;r.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}};});
+
   const q=state.quest;
   $("listtitle").textContent=q;
-  const L=$("list");
+  const L=$("list"), more=$("more");
   if(q==="Adult"||q==="Large"){
-    const v=q==="Adult"?adult:large;
-    $("listnote").textContent=`no bait effect on size. ${pct1(v)} of casts`;
-    $("legend").hidden=true; L.innerHTML="";
-    $("more").hidden=true;return;
+    $("listnote").textContent=`No bait effect on size. ${pct1(q==="Adult"?adult:large)} of casts.`;
+    L.innerHTML="";more.hidden=true;saveHash();return;
   }
-  $("legend").hidden=false;
   const X=QX[q], c=candidates(loc,luck,X,lures), base=ro[X];
-  $("listnote").textContent=`no bait: ${pct1(base)}. Hidden: under +3 pts`;
-  const shown=c.filter(r=>r.mid-base>=.03);
-  const lim=state.showAll?shown.length:12;
-  L.innerHTML=shown.slice(0,lim).map((r,ix)=>{
-    const b=r.b, rng=Math.abs(r.ce-r.fl)>.005, up=r.mid-base;
-    const nm=[];for(let i=0;i<5;i++) if(r.names[i].length) nm.push(RL[i]+": "+r.names[i].join(", "));
-    const only=r.cnt.every((n,i)=>!n||i===X);
-    return `<div class="item${ix===0?" first":""}"><div class="rk">${ix+1}</div><div><div class="name">${b.name}</div><div class="meta"><span class="chip">${RL[TIER[b.rar]]}</span>${b.kind==="lure"?'<span class="chip lure">lure x'+uses(b.name)+'</span>':""}<span>${b.lik}% lik</span><span>pool ${poolStr(r.cnt)}</span></div></div>
-      <div><div class="bar" role="img" aria-label="${pct(r.fl)} to ${pct(r.ce)}"><i class="c" style="width:${r.ce*100}%"></i><i class="f" style="width:${r.fl*100}%"></i><b style="left:${base*100}%"></b></div>
-      <div class="nums"><span>${rng?pct(r.fl)+" to "+pct(r.ce):pct(r.fl)}</span><span class="up">+${(up*100).toFixed(0)} pts</span></div></div>
-      <div class="fish">${nm.join(" · ")}${r.alts.length?"<br>same: "+r.alts.join(", "):""}</div></div>`;}).join("")||'<p class="note">nothing beats base odds</p>';
-  const more=$("more");
-  if(shown.length>12){more.hidden=false;more.textContent=state.showAll?"Top 12":`All ${shown.length}`;more.onclick=()=>{state.showAll=!state.showAll;render();};}else more.hidden=true;
-
+  $("listnote").textContent=`No bait: ${pct1(base)}. Hidden: under +3 pts. Click a header to sort.`;
+  const rows=c.filter(r=>r.mid-base>=.03).map((r,i)=>({r,rk:i+1,name:r.b.name,tier:TIER[r.b.rar],lik:r.b.lik,pool:poolStr(r.cnt),odds:r.mid,up:r.mid-base,
+    fish:RL.map((t,k)=>r.names[k].length?t+": "+r.names[k].join(", "):"").filter(Boolean).join(" · ")+(r.alts.length?" · same: "+r.alts.join(", "):"")}));
+  rows.sort((a,b)=>{const x=a[state.sort],y=b[state.sort];return (typeof x==="string"?x.localeCompare(y):x-y)*state.dir||a.rk-b.rk;});
+  const lim=state.showAll?rows.length:12;
+  L.innerHTML=`<thead><tr>`+COLS.map(([k,t,n])=>`<th class="s${n?" n":""}" data-k="${k}" tabindex="0"${state.sort===k?` aria-sort="${state.dir>0?"ascending":"descending"}"`:""}>${t}</th>`).join("")+`</tr></thead><tbody>`+
+    (rows.slice(0,lim).map(({r,rk,name,tier,lik,pool,odds,up,fish})=>{const rng=Math.abs(r.ce-r.fl)>.005;
+      return `<tr><td class="n">${rk}</td><td>${esc(name)}${r.b.kind==="lure"?` <span class="hint">lure x${uses(name)}</span>`:""}</td><td>${RL[tier]}</td><td class="n">${lik}</td><td class="n">${pool}</td><td class="n">${rng?pct(r.fl)+" to "+pct(r.ce):pct(r.fl)}</td><td class="n">+${(up*100).toFixed(0)}</td><td class="fish">${esc(fish)}</td></tr>`;}).join("")||`<tr><td colspan="8" class="hint">Nothing beats base odds</td></tr>`)+`</tbody>`;
+  L.querySelectorAll("th.s").forEach(h=>{
+    const go=()=>{const k=h.dataset.k;if(state.sort===k)state.dir=-state.dir;else{state.sort=k;state.dir=(k==="name"||k==="tier"||k==="pool"||k==="rk")?1:-1;}render();};
+    h.onclick=go;h.onkeydown=e=>{if(e.key==="Enter")go();};});
+  if(rows.length>12){more.hidden=false;more.textContent=state.showAll?"Top 12":`All ${rows.length}`;more.onclick=()=>{state.showAll=!state.showAll;render();};}else more.hidden=true;
+  saveHash();
 }
-$("loc").innerHTML=D.locs.map(l=>`<option value="${l.name}">${l.name} (${l.level})</option>`).join("");
+$("loc").innerHTML=D.locs.map(l=>`<option value="${esc(l.name)}">${esc(l.name)} (${l.level})</option>`).join("");
 $("loc").value="Hawaii";
+loadHash();
 document.querySelectorAll(".tier").forEach(c=>c.addEventListener("input",()=>{state.showAll=false;render();}));
 for(const id of ["loc","luck","scale","lures"]) $(id).addEventListener("input",()=>{state.showAll=false;render();});
 render();
 </script>
-
 </body></html>
