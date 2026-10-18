@@ -1,0 +1,39 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Luck, Scale, Prospect</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="sheet.css"></head><body>
+<div class="wrap">
+<h1>Luck, Scale, Prospect <span class="hint">fill in what you want to see</span></h1>
+<table class="inputs" aria-label="Inputs">
+<tr><th scope="row"><label for="lk">Luck</label></th><td><input id="lk" type="number" min="0" max="5000" step="25" inputmode="numeric"></td><td class="hint">0 to 5000</td></tr>
+<tr><th scope="row"><label for="sc">Scale</label></th><td><input id="sc" type="number" min="0" max="5000" step="25" inputmode="numeric"></td><td class="hint">0 to 5000</td></tr>
+<tr><th scope="row"><label for="pr">Prospect</label></th><td><input id="pr" type="number" min="0" max="20000" step="25" inputmode="numeric"></td><td class="hint">0 to 20000</td></tr>
+</table>
+<div id="o-lk" hidden><div class="sec">Rarity</div><div class="scroll"><table id="t-lk"></table></div></div>
+<div id="o-sc" hidden><div class="sec">Size</div><div class="scroll"><table id="t-sc"></table></div></div>
+<div id="o-pr" hidden><div class="sec">Shard</div><div class="scroll"><table id="t-pr"></table></div></div>
+<p class="foot">Source: FishOnMC wiki, Fishing Stats. Rarity in percent: common 55 - 0.02 x luck, rare 30 + 0.002 x luck, epic 10 + 0.004 x luck, legendary 4 + 0.006 x luck, mythical 1 + 0.008 x luck. Size, up to 1052 scale: baby 20 - 0.019s, juvenile 40 - 0.008s, adult 30 + 0.008s; from 1053 to 2222: baby 0, juvenile 60 - 0.027s, adult 30 + 0.008s; from 2223: baby 0, juvenile 0, adult 90 - 0.019s; always large 9.98 + 0.018s and gigantic 0.02 + 0.001s. Anything below 0 is cut to 0 and the rest rescaled to 100%, as the bait picker does. Shard chance = 1 / (50 / (1 + prospect x 0.0008)).</p>
+</div>
+<script src="sheet.js"></script>
+<script>
+const RN=["Common","Rare","Epic","Legendary","Mythical"],SZ=["Baby","Juvenile","Adult","Large","Gigantic"];
+const norm=a=>{a=a.map(x=>Math.max(0,x));const t=a.reduce((x,y)=>x+y,0);return a.map(x=>x/t);};
+const raw=l=>[55-l*.02,30+l*.002,10+l*.004,4+l*.006,1+l*.008];
+const odds=l=>norm(raw(l));
+function sizeOdds(s){
+  let baby,juv,adult;
+  if(s<=1052){baby=20-s*.019;juv=40-s*.008;adult=30+s*.008;}
+  else if(s<=2222){baby=0;juv=60-s*.027;adult=30+s*.008;}
+  else{baby=0;juv=0;adult=90-s*.019;}
+  return norm([baby,juv,adult,9.98+s*.018,.02+s*.001]);
+}
+const shard=p=>(1+p*0.0008)/50;
+function render(){
+  const l=readOpt("lk"),s=readOpt("sc"),p=readOpt("pr");
+  $("o-lk").hidden=l===null;$("o-sc").hidden=s===null;$("o-pr").hidden=p===null;
+  if(l!==null){const o=odds(l),r=raw(l);$("t-lk").innerHTML=table([["Rarity"],["Raw %",1],["Odds",1],["Per cast",1]],RN.map((n,i)=>[n,fix(r[i],3),pc(o[i]),one(o[i])]));}
+  if(s!==null){const o=sizeOdds(s);$("t-sc").innerHTML=table([["Size"],["Odds",1],["Per cast",1]],SZ.map((n,i)=>[n,pc(o[i]),one(o[i])]));}
+  if(p!==null)$("t-pr").innerHTML=table([["Prospect",1],["Shard chance",1],["Per cast",1],["Times base",1]],[[p,pc(shard(p)),one(shard(p)),fix(shard(p)*50)+"x"]]);
+}
+bind(["lk","sc","pr"],render);
+</script>
+</body></html>
