@@ -1,0 +1,59 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Per Hour</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="sheet.css"></head><body>
+<div class="wrap">
+<h1>Per Hour <span class="hint">FishOnMC expected catches per hour</span></h1>
+<table class="inputs" aria-label="Inputs">
+<tr><th scope="row"><label for="bs">Bite speed</label></th><td><input id="bs" type="number" min="0" max="3000" step="10" value="0" inputmode="numeric"></td><td class="hint">from your pole</td></tr>
+<tr><th scope="row"><label for="lk">Luck</label></th><td><input id="lk" type="number" min="0" max="5000" step="25" value="1000" inputmode="numeric"></td><td class="hint">0 to 5000</td></tr>
+<tr><th scope="row"><label for="sc">Scale</label></th><td><input id="sc" type="number" min="0" max="5000" step="25" value="800" inputmode="numeric"></td><td class="hint">0 to 5000</td></tr>
+<tr><th scope="row"><label for="pr">Prospect</label></th><td><input id="pr" type="number" min="0" max="20000" step="25" value="0" inputmode="numeric"></td><td class="hint">0 to 20000</td></tr>
+<tr><th scope="row"><label for="pl">Pet luck %</label></th><td><input id="pl" type="number" min="0" max="1000" step="5" value="0" inputmode="numeric"></td><td class="hint">0 to 1000</td></tr>
+<tr><th scope="row"><label for="af">Seconds after bite</label></th><td><input id="af" type="number" min="0" max="120" step="1" value="15" inputmode="numeric"></td><td class="hint">reel and recast, set it yourself</td></tr>
+<tr><th scope="row"><label for="wx">Weather</label></th><td><select id="wx"><option value="0">none</option><option value="50">rain shower +50 bite</option><option value="100">thunderstorm +100 bite</option><option value="150">supercell +150 bite</option></select></td></tr>
+<tr><th scope="row"><label for="mn">Moon</label></th><td><select id="mn"><option value="0">none</option><option value="120">full, blue, super or blood moon +120 bite</option></select></td></tr>
+<tr><th scope="row"><label for="ch">Chummer</label></th><td><select id="ch"><option value="0">none</option><option value="75">common +75 bite</option><option value="130">rare +130 bite</option><option value="180">epic +180 bite</option><option value="250">legendary +250 bite</option><option value="375">mythical +375 bite</option></select></td></tr>
+<tr><th scope="row">Events</th><td class="chk"><label><input id="fr" type="checkbox"> fish frenzy</label><label><input id="rb" type="checkbox"> rainbow +500 luck</label></td></tr>
+</table>
+
+<div class="scroll"><table id="res"></table></div>
+<div class="sec">Rarity</div><div class="scroll"><table id="rar"></table></div>
+<div class="sec">Size</div><div class="scroll"><table id="siz"></table></div>
+<div class="sec">Shards and pets</div><div class="scroll"><table id="oth"></table></div>
+<p class="foot">Source: FishOnMC wiki, Fishing Stats. Casts per hour = 3600 / (average bite wait + the seconds after the bite you typed). The wiki gives no formula for the minigame length (line strength), so that number is yours to set. The average wait assumes the wait is picked evenly between min and max, and the boosts are assumed to add up; neither is stated on the wiki. Rarity and size are rolled once per cast, shards and pets are separate chances per cast. Bait is not counted; it only raises the odds above this (see the bait picker). Fish frenzy adds +100 bite speed, +250 luck, +250 scale, +50 prospect and +25% pet luck (from the server's chat lines).</p>
+</div>
+<script src="sheet.js"></script>
+<script>
+const RN=["Common","Rare","Epic","Legendary","Mythical"],SZ=["Baby","Juvenile","Adult","Large","Gigantic"],PN=[750,4000,10000,30000,80000];
+const wait=t=>({max:Math.max(3,20-0.02*t),min:Math.max(1.5,5-0.005*t)});
+function odds(l){const p=[55-l*.02,30+l*.002,10+l*.004,4+l*.006,1+l*.008].map(x=>Math.max(0,x));const s=p.reduce((a,b)=>a+b,0);return p.map(x=>x/s);}
+function sizeOdds(s){
+  let baby,juv,adult;
+  if(s<=1052){baby=20-s*.019;juv=40-s*.008;adult=30+s*.008;}
+  else if(s<=2222){baby=0;juv=60-s*.027;adult=30+s*.008;}
+  else{baby=0;juv=0;adult=90-s*.019;}
+  const a=[baby,juv,adult,9.98+s*.018,.02+s*.001].map(x=>Math.max(0,x)/100),t=a.reduce((x,y)=>x+y,0);return a.map(x=>x/t);
+}
+const num=x=>x>=100?Math.round(x).toLocaleString("en-US"):x>=1?x.toFixed(2):x.toFixed(3);
+function every(perHour){ // time for one, given the expected number per hour
+  if(!(perHour>0))return "never";
+  const s=3600/perHour;
+  return s<120?Math.round(s)+" s":s<7200?Math.round(s/60)+" min":(s/3600<100?(s/3600).toFixed(1):Math.round(s/3600).toLocaleString("en-US"))+" h";
+}
+function render(){
+  const fr=$("fr").checked;
+  const t=readNum("bs")+(+$("wx").value)+(+$("mn").value)+(+$("ch").value)+(fr?100:0);
+  const luck=readNum("lk")+(fr?250:0)+($("rb").checked?500:0);
+  const scale=readNum("sc")+(fr?250:0);
+  const prospect=readNum("pr")+(fr?50:0);
+  const pet=readNum("pl")+(fr?25:0);
+  const af=readNum("af"),w=wait(t),avg=(w.max+w.min)/2,per=avg+af,cph=3600/per;
+  $("res").innerHTML=table([["Total bite speed",1],["Average wait",1],["Seconds per cast",1],["Casts per hour",1]],[[t,fix(avg)+" s",fix(per,1)+" s",num(cph)]]);
+  const row=(n,p)=>[n,pc(p,p<0.001?4:p<0.01?3:2),num(cph*p),every(cph*p)],H=[["",0],["Odds per cast",1],["Per hour",1],["One every",1]];
+  $("rar").innerHTML=table([["Rarity"],...H.slice(1)],odds(luck).map((p,i)=>row(RN[i],p)));
+  $("siz").innerHTML=table([["Size"],...H.slice(1)],sizeOdds(scale).map((p,i)=>row(SZ[i],p)));
+  $("oth").innerHTML=table([["Drop"],...H.slice(1)],[row("Shard",(1+prospect*0.0008)/50),...PN.map((n,i)=>row("Pet, "+RN[i].toLowerCase(),(1+pet/100)/n))]);
+}
+bind(["bs","lk","sc","pr","pl","af","wx","mn","ch","fr","rb"],render);
+</script>
+</body></html>
