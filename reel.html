@@ -1,0 +1,26 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Reel Speed</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="sheet.css"></head><body>
+<div class="wrap">
+<h1>Reel Speed <span class="hint">FishOnMC minigame progress per tick</span></h1>
+<table class="inputs" aria-label="Inputs">
+<tr><th scope="row"><label for="rs">Reel speed</label></th><td><input id="rs" type="number" min="0" max="10000" step="10" value="0" inputmode="numeric"></td><td class="hint">0 to 10000, from your reel</td></tr>
+<tr><th scope="row">Super moon</th><td class="chk"><label><input id="sm" type="checkbox"> +150 reel speed</label></td></tr>
+</table>
+<div class="scroll"><table id="res"></table></div>
+<div class="sec">Reference</div>
+<div class="scroll"><table id="ref"></table></div>
+<p class="foot">Source: FishOnMC wiki, Fishing Stats. Reel speed sets the progress earned per successful tick in the minigame. Base 0.6 units, 1 reel speed = 0.001 units, so +600 doubles it. Line strength lowers the progress the bar needs; the wiki gives no formula for it, so there is no catch time here.</p>
+</div>
+<script src="sheet.js"></script>
+<script>
+
+const units=r=>0.6+0.001*r;
+function render(){
+  const r=readNum("rs")+($("sm").checked?150:0);
+  $("res").innerHTML=table([["Total reel speed",1],["Progress per tick",1],["Times base",1]],[[r,fix(units(r),3),fix(units(r)/0.6)+"x"]]);
+  $("ref").innerHTML=table([["Reel speed",1],["Progress per tick",1],["Times base",1]],[0,100,200,300,400,500,600,800,1000,1500,2000].map(p=>[p,fix(units(p),3),fix(units(p)/0.6)+"x"]));
+}
+bind(["rs","sm"],render);
+</script>
+</body></html>

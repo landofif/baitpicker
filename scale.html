@@ -1,0 +1,33 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Scale</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="sheet.css"></head><body>
+<div class="wrap">
+<h1>Scale <span class="hint">FishOnMC size odds</span></h1>
+<table class="inputs" aria-label="Inputs">
+<tr><th scope="row"><label for="sc">Scale</label></th><td><input id="sc" type="number" min="0" max="5000" step="25" value="800" inputmode="numeric"></td><td class="hint">0 to 5000, from armour, pets and the location roll</td></tr>
+</table>
+<div class="scroll"><table id="res"></table></div>
+<div class="sec">Reference</div>
+<div class="scroll"><table id="ref"></table></div>
+<p class="foot">Source: FishOnMC wiki, Fishing Stats. Up to 1052 scale: baby 20 - 0.019s, juvenile 40 - 0.008s, adult 30 + 0.008s. From 1053 to 2222: baby 0, juvenile 60 - 0.027s, adult 30 + 0.008s. From 2223: baby 0, juvenile 0, adult 90 - 0.019s. Always large 9.98 + 0.018s and gigantic 0.02 + 0.001s, in percent. Anything below 0 is cut to 0 and the rest rescaled to 100%, as the bait picker does.</p>
+</div>
+<script src="sheet.js"></script>
+<script>
+
+const SZ=["Baby","Juvenile","Adult","Large","Gigantic"];
+function sizeOdds(s){
+  let baby,juv,adult;
+  if(s<=1052){baby=20-s*.019;juv=40-s*.008;adult=30+s*.008;}
+  else if(s<=2222){baby=0;juv=60-s*.027;adult=30+s*.008;}
+  else{baby=0;juv=0;adult=90-s*.019;}
+  const large=9.98+s*.018,gig=.02+s*.001;
+  const a=[baby,juv,adult,large,gig].map(x=>Math.max(0,x)/100),t=a.reduce((x,y)=>x+y,0);return a.map(x=>x/t);
+}
+function render(){
+  const o=sizeOdds(readNum("sc"));
+  $("res").innerHTML=table([["Size"],["Odds",1],["Per cast",1]],SZ.map((n,i)=>[n,pc(o[i]),one(o[i])]));
+  $("ref").innerHTML=table([["Scale",1],...SZ.map(n=>[n,1])],[0,250,500,750,1000,1052,1053,1500,2000,2222,2223,2500,3000,3500,4000].map(p=>[p,...sizeOdds(p).map(x=>pc(x))]));
+}
+bind(["sc"],render);
+</script>
+</body></html>
