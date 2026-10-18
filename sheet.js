@@ -1,5 +1,5 @@
 const $=id=>document.getElementById(id);
-const PAGES=[["index.html","Bait picker"],["perhour.html","Per hour"]];
+const PAGES=[["index.html","Bait picker"],["stats.html","Luck, scale, prospect"],["petluck.html","Pet luck"]];
 (function(){const here=location.pathname.split("/").pop()||"index.html";
   document.querySelector(".wrap").insertAdjacentHTML("afterbegin","<nav>"+PAGES.map(([h,t])=>`<a href="${h}"${h===here?" aria-current=page":""}>${t}</a>`).join("")+"</nav>");})();
 // typed number: empty or out of range turns the cell red, the maths uses the clamped value
@@ -8,6 +8,14 @@ function readNum(id){
   const ok=raw!==""&&isFinite(v)&&v>=lo&&v<=hi;
   el.classList.toggle("bad",!ok);
   return Math.min(hi,Math.max(lo,raw!==""&&isFinite(v)?v:lo));
+}
+// optional input: blank gives null (nothing shown), otherwise the clamped number; bad text or out of range turns red
+function readOpt(id){
+  const el=$(id),lo=+el.min,hi=+el.max,raw=el.value.trim();
+  if(raw===""){el.classList.remove("bad");return null;}
+  const v=Number(raw),ok=isFinite(v)&&v>=lo&&v<=hi;
+  el.classList.toggle("bad",!ok);
+  return isFinite(v)?Math.min(hi,Math.max(lo,v)):null;
 }
 const fix=(x,d=2)=>x.toFixed(d);
 const pc=(x,d=2)=>(x*100).toFixed(d)+"%";
