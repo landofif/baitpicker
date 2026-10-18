@@ -1,5 +1,5 @@
 const $=id=>document.getElementById(id);
-const PAGES=[["index.html","Bait picker"],["bite.html","Bite speed"],["reel.html","Reel speed"],["luck.html","Luck"],["scale.html","Scale"],["prospect.html","Prospect"],["petluck.html","Pet luck"],["perhour.html","Per hour"]];
+const PAGES=[["index.html","Bait picker"],["perhour.html","Per hour"]];
 (function(){const here=location.pathname.split("/").pop()||"index.html";
   document.querySelector(".wrap").insertAdjacentHTML("afterbegin","<nav>"+PAGES.map(([h,t])=>`<a href="${h}"${h===here?" aria-current=page":""}>${t}</a>`).join("")+"</nav>");})();
 // typed number: empty or out of range turns the cell red, the maths uses the clamped value
