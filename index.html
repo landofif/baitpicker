@@ -7,8 +7,8 @@
 
 <table class="inputs" aria-label="Inputs">
 <tr><th scope="row"><label for="loc">Location</label></th><td><select id="loc"></select></td></tr>
-<tr><th scope="row"><label for="luck">Luck</label></th><td><input id="luck" type="number" min="0" max="2500" step="25" value="1000" inputmode="numeric"></td><td class="hint" style="border:0;padding-left:8px">0 to 2500</td></tr>
-<tr><th scope="row"><label for="scale">Scale</label></th><td><input id="scale" type="number" min="0" max="3500" step="25" value="800" inputmode="numeric"></td><td class="hint" style="border:0;padding-left:8px">0 to 3500</td></tr>
+<tr><th scope="row"><label for="luck">Luck</label></th><td><input id="luck" type="number" min="0" max="2500" step="25" inputmode="numeric"></td><td class="hint" style="border:0;padding-left:8px">0 to 2500</td></tr>
+<tr><th scope="row"><label for="scale">Scale</label></th><td><input id="scale" type="number" min="0" max="3500" step="25" inputmode="numeric"></td><td class="hint" style="border:0;padding-left:8px">0 to 3500</td></tr>
 <tr><th scope="row">Tiers</th><td class="chk">
 <label><input class="tier" data-t="C" type="checkbox" checked> Common</label>
 <label><input class="tier" data-t="R" type="checkbox" checked> Rare</label>
@@ -114,7 +114,11 @@ function loadHash(){
 }
 
 function render(){
-  const loc=D.locs.find(l=>l.name===$("loc").value), luck=readNum("luck"); readNum("scale");
+  const loc=D.locs.find(l=>l.name===$("loc").value);
+  if(!loc||$("luck").value.trim()===""){
+    $("listtitle").textContent="";$("listnote").textContent="Pick a location and enter luck.";$("list").innerHTML="";$("more").hidden=true;
+    if($("luck").value.trim()==="")$("luck").classList.remove("bad");saveHash();return;}
+  const luck=readNum("luck"); readNum("scale");
   const lures=$("lures").checked, ro=odds(luck);
   const all=[];
   for(const q of ["Rare","Epic","Legendary"]){
@@ -140,8 +144,7 @@ function render(){
   if(rows.length>12){more.hidden=false;more.textContent=state.showAll?"Top 12":`All ${rows.length}`;more.onclick=()=>{state.showAll=!state.showAll;render();};}else more.hidden=true;
   saveHash();
 }
-$("loc").innerHTML=D.locs.map(l=>`<option value="${esc(l.name)}">${esc(l.name)} (${l.level})</option>`).join("");
-$("loc").value="Hawaii";
+$("loc").innerHTML='<option value="">choose a location</option>'+D.locs.map(l=>`<option value="${esc(l.name)}">${esc(l.name)} (${l.level})</option>`).join("");
 loadHash();
 document.querySelectorAll(".tier").forEach(c=>c.addEventListener("input",()=>{state.showAll=false;render();}));
 for(const id of ["loc","luck","scale","lures"]) $(id).addEventListener("input",()=>{state.showAll=false;render();});

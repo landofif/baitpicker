@@ -6,7 +6,7 @@
 <table class="inputs" aria-label="Inputs">
 <tr><th scope="row"><label for="loc">Location</label></th><td><input id="loc" type="text" placeholder="type a location"></td></tr>
 <tr><th scope="row"><label for="bait">Bait</label></th><td><input id="bait" type="text" placeholder="type a bait"></td></tr>
-<tr><th scope="row"><label for="luck">Luck</label></th><td><input id="luck" type="number" min="0" max="5000" step="25" value="2550" inputmode="numeric"></td><td class="hint">0 to 5000</td></tr>
+<tr><th scope="row"><label for="luck">Luck</label></th><td><input id="luck" type="number" min="0" max="5000" step="25" inputmode="numeric"></td><td class="hint">0 to 5000</td></tr>
 <tr><th scope="row"><label for="eff">Bait effectiveness %</label></th><td><input id="eff" type="number" min="0" max="500" step="1" value="0" inputmode="numeric"></td><td class="hint">e.g. 8 for two Badwater reels</td></tr>
 </table>
 <p class="verdict" id="verdict" aria-live="polite"></p>
@@ -42,13 +42,14 @@ let locBox,baitBox;
 const curLoc=()=>D.locs.find(l=>l.name===locBox.value);
 function fillBaits(keep){
   const loc=curLoc();
+  if(!loc){baitBox.items=[];baitBox.set("");return;}
   baitBox.items=D.baits.filter(b=>b.lik>0&&usable(b,loc)&&pool(b,loc).cnt.some(n=>n)).map(b=>({v:b.name,t:`${b.name} (${b.lik}%)`}));
-  baitBox.set(baitBox.items.some(i=>i.v===keep)?keep:(baitBox.items[0]||{}).v||"");
+  baitBox.set(baitBox.items.some(i=>i.v===keep)?keep:"");
 }
 function render(){
-  const loc=curLoc(),luck=readNum("luck"),eff=readNum("eff");
+  const loc=curLoc(),luck=readOpt("luck"),eff=readOpt("eff")||0;
   const b=D.baits.find(x=>x.name===baitBox.value);
-  if(!b){$("verdict").textContent="No usable bait here";$("steps").innerHTML=$("res").innerHTML="";return;}
+  if(!loc||!b||luck===null){$("verdict").textContent=!loc?"Pick a location, a bait and enter luck.":!b?"No usable bait here":"Enter luck.";$("steps").innerHTML=$("res").innerHTML="";return;}
   const {cnt,names}=pool(b,loc),p=odds(luck);
   const lik=Math.min(1,b.lik/100*(1+eff/100)),low=cnt.findIndex(n=>n>0);
   const fl=[0,0,0,0,0],rows=[];
@@ -67,8 +68,8 @@ const go=()=>{render();try{history.replaceState(null,"","#"+new URLSearchParams(
 locBox=combo("loc",()=>{fillBaits(baitBox.value);go();});
 baitBox=combo("bait",go);
 locBox.items=D.locs.map(l=>({v:l.name,t:`${l.name} (${l.level})`}));
-locBox.set(D.locs.some(l=>l.name===hp.get("loc"))?hp.get("loc"):"Cypress Lake");
-fillBaits(hp.get("bait")||"Frog Leopard");
+locBox.set(D.locs.some(l=>l.name===hp.get("loc"))?hp.get("loc"):"");
+fillBaits(hp.get("bait")||"");
 if(hp.has("luck"))$("luck").value=hp.get("luck");
 if(hp.has("eff"))$("eff").value=hp.get("eff");
 for(const id of ["luck","eff"])$(id).addEventListener("input",go);
