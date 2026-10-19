@@ -1,6 +1,6 @@
 :root{color-scheme:dark;--bg:#0c0c0c;--fg:#cccccc;--muted:#767676;--line:#3a3a3a;--head:#0c0c0c;--sel:#1c2b45;--bad:#ff5f56;--cell:#0c0c0c;--acc:#3b9cff;--hl:#f2f2f2}
 *{box-sizing:border-box}
-body{margin:0;padding:16px;background:var(--bg);color:var(--fg);font:14px/1.45 Consolas,"Cascadia Mono",Menlo,"DejaVu Sans Mono",ui-monospace,monospace}
+body{text-transform:lowercase;margin:0;padding:16px;background:var(--bg);color:var(--fg);font:14px/1.45 Consolas,"Cascadia Mono",Menlo,"DejaVu Sans Mono",ui-monospace,monospace}
 .wrap{max-width:1000px;margin:0 auto}
 h1{font-size:14px;margin:0 0 12px;font-weight:400;color:var(--hl)}
 nav{display:flex;flex-wrap:wrap;gap:4px 18px;margin:0 0 14px}
@@ -20,7 +20,7 @@ th.s[aria-sort=descending]::after{content:" \25BC";font-size:10px}
 .inputs th,.inputs td{border:0}
 .inputs th{width:110px}
 .inputs td{padding:0 12px 0 0}
-.inputs input[type=number],.inputs select{width:100%;min-width:200px;border:1px solid var(--line);border-radius:0;padding:3px 8px;background:var(--cell);color:var(--hl);font:inherit;height:28px}
+.inputs input[type=number],.inputs select{width:100%;min-width:200px;border:1px solid var(--line);border-radius:0;padding:3px 8px;background:var(--cell);color:var(--hl);font:inherit;text-transform:inherit;height:28px}
 .inputs input:focus,.inputs select:focus{outline:1px solid var(--acc);outline-offset:-1px}
 .inputs input.bad{border-color:var(--bad);color:var(--bad)}
 .inputs td.chk{padding:3px 0}
