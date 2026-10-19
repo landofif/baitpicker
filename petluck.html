@@ -1,13 +1,12 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><title>pet luck</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<link rel="stylesheet" href="sheet.css?v=5"></head><body>
+<link rel="stylesheet" href="sheet.css?v=6"></head><body>
 <div class="wrap">
 <h1>Pet Luck <span class="hint">fill in to see pet catch odds</span></h1>
 <table class="inputs" aria-label="Inputs">
 <tr><th scope="row"><label for="pl">Pet luck %</label></th><td><input id="pl" type="number" min="0" max="1000" step="5" inputmode="numeric"></td><td class="hint">0 to 1000, in percent</td></tr>
 </table>
 <div id="o-pl" hidden><div class="scroll"><table id="res"></table></div></div>
-<p class="foot">Source: FishOnMC wiki, Fishing Stats. Chance = 1 / (N / (1 + pet luck / 100)) with N = 750, 4000, 10000, 30000, 80000. The wiki table has no row labels; I read them as common to mythical because it says +100% pet luck takes mythical from 1/80000 to 1/40000.</p>
 </div>
 <script src="sheet.js?v=2"></script>
 <script>
