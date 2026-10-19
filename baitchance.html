@@ -1,0 +1,78 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>bait chance</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="sheet.css?v=5"></head><body>
+<div class="wrap">
+<h1>Bait Chance <span class="hint">what a bait does to your rarity odds</span></h1>
+<table class="inputs" aria-label="Inputs">
+<tr><th scope="row"><label for="loc">Location</label></th><td><select id="loc"></select></td></tr>
+<tr><th scope="row"><label for="bait">Bait</label></th><td><select id="bait"></select></td></tr>
+<tr><th scope="row"><label for="luck">Luck</label></th><td><input id="luck" type="number" min="0" max="5000" step="25" value="2550" inputmode="numeric"></td><td class="hint">0 to 5000</td></tr>
+<tr><th scope="row"><label for="eff">Bait effectiveness %</label></th><td><input id="eff" type="number" min="0" max="500" step="1" value="0" inputmode="numeric"></td><td class="hint">e.g. 8 for two Badwater reels</td></tr>
+</table>
+<p class="verdict" id="verdict" aria-live="polite"></p>
+
+<div class="sec">Step by step</div>
+<div class="scroll"><table id="steps"></table></div>
+<div class="sec">Result</div>
+<div class="scroll"><table id="res"></table></div>
+
+<div class="sec">What affects bait chance</div>
+<ul class="hint">
+<li>Luck sets the rarity that is rolled first (see the Luck page). The bait is checked after that.</li>
+<li>The bait's own likelihood (the Lik % on the wiki, e.g. Leopard Frog 80%) is the chance the bait takes effect once the rarity is rolled.</li>
+<li>Bait effectiveness (reels) multiplies that likelihood: 80% x 1.08 = 86.4%. Capped at 100%.</li>
+<li>The bait only helps for the fish it targets, in water it can be used in. The target fish set the rarities it can produce.</li>
+<li>If the rolled rarity has no target fish, the bait falls to the next lower rarity that has one. A rolled rarity below every target fish gets a normal fish (no upgrade).</li>
+<li>So a rolled legendary or mythical with an epic-only lure becomes epic when the bait hits: more luck makes the lure turn higher rolls into epic, it never upgrades above the pool.</li>
+</ul>
+<p class="foot">Source: FishOnMC wiki and zeb (staff): rarity is rolled first, then the likelihood is checked. Pool is the fish at this location that the bait targets. Multiplying effectiveness into the likelihood is read from the example 80% to 86.4% with 8%; if the real rule is additive points, set the box accordingly. Same model as the bait picker.</p>
+</div>
+<script src="data.js?v=1"></script>
+<script src="sheet.js?v=3"></script>
+<script>
+const RN=["Common","Rare","Epic","Legendary","Mythical"];
+const odds=l=>{const p=[55-l*.02,30+l*.002,10+l*.004,4+l*.006,1+l*.008].map(x=>Math.max(0,x)),s=p.reduce((a,b)=>a+b,0);return p.map(x=>x/s);};
+const ALIAS={"Spotted Sea Trout":"Spotted Seatrout"};
+const matches=(t,f)=>t==="*"||(t[0]==="@"?f[3]===t.slice(1):(t==="Peacock Bass species"?f[0].includes("Peacock Bass"):(t===f[2]||t===f[0]||ALIAS[t]===f[0])));
+function usable(b,loc){const w=loc.water;if(b.water==="F"||b.water==="S")return w==="B"||w===b.water;return b.water===loc.name;}
+function pool(b,loc){const cnt=[0,0,0,0,0],names=[[],[],[],[],[]];
+  for(const f of loc.fish)if(b.targets.some(t=>matches(t,f))){cnt[f[1]]++;names[f[1]].push(f[0]);}return {cnt,names};}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const p1=x=>(x*100).toFixed(1)+"%";
+const curLoc=()=>D.locs.find(l=>l.name===$("loc").value);
+function fillBaits(keep){
+  const loc=curLoc();
+  const list=D.baits.filter(b=>b.lik>0&&usable(b,loc)&&pool(b,loc).cnt.some(n=>n));
+  $("bait").innerHTML=list.map(b=>`<option value="${esc(b.name)}">${esc(b.name)} (${b.lik}%)</option>`).join("");
+  if(keep&&list.some(b=>b.name===keep))$("bait").value=keep;
+}
+function render(){
+  const loc=curLoc(),luck=readNum("luck"),eff=readNum("eff");
+  const b=D.baits.find(x=>x.name===$("bait").value);
+  if(!b){$("verdict").textContent="No usable bait here";$("steps").innerHTML=$("res").innerHTML="";return;}
+  const {cnt,names}=pool(b,loc),p=odds(luck);
+  const lik=Math.min(1,b.lik/100*(1+eff/100)),low=cnt.findIndex(n=>n>0);
+  const fl=[0,0,0,0,0],rows=[];
+  for(let r=0;r<5;r++){
+    let to=null;for(let q=r;q>=0;q--)if(cnt[q]>0){to=q;break;}
+    if(to!==null){fl[to]+=lik*p[r];fl[r]+=(1-lik)*p[r];}else fl[r]+=p[r];
+    rows.push([RN[r],p1(p[r]),to===null?"normal fish":RN[to]+(to===r?"":" (falls down)"),to===null?"-":p1(lik*p[r])]);
+  }
+  $("steps").innerHTML=table([["Rolled"],["Rolled chance",1],["If bait hits",0],["Bait hit chance",1]],rows);
+  $("res").innerHTML=table([["Rarity"],["No bait",1],["With bait",1],["Change",1],["Fish"]],RN.map((n,i)=>{
+    const d=fl[i]-p[i];return [n,p1(p[i]),p1(fl[i]),(d>=0?"+":"")+(d*100).toFixed(1),esc(names[i].join(", "))];}));
+  $("verdict").innerHTML=`${esc(b.name)} at ${esc(loc.name)}: bait hits <strong>${(lik*100).toFixed(1)}%</strong> of rolls (${b.lik}% base${eff?` x ${(1+eff/100).toFixed(2)}`:""}). Target rarity: ${RN[low]}, ${p1(fl[low])} per cast (${p1(p[low])} without).`;
+}
+$("loc").innerHTML=D.locs.map(l=>`<option value="${esc(l.name)}">${esc(l.name)} (${l.level})</option>`).join("");
+const hp=new URLSearchParams(location.hash.slice(1));
+$("loc").value=hp.get("loc")||"Cypress Lake";
+if($("loc").value==="")$("loc").value=D.locs[0].name;
+fillBaits(hp.get("bait")||"Frog Leopard");
+if(hp.has("luck"))$("luck").value=hp.get("luck");
+if(hp.has("eff"))$("eff").value=hp.get("eff");
+function go(){render();try{history.replaceState(null,"","#"+new URLSearchParams({loc:$("loc").value,bait:$("bait").value,luck:$("luck").value,eff:$("eff").value}));}catch(e){}}
+$("loc").addEventListener("input",()=>{fillBaits($("bait").value);go();});
+for(const id of ["bait","luck","eff"])$(id).addEventListener("input",go);
+go();
+</script>
+</body></html>
