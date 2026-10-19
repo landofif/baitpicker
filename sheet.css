@@ -20,7 +20,7 @@ th.s[aria-sort=descending]::after{content:" \25BC";font-size:10px}
 .inputs th,.inputs td{border:0}
 .inputs th{width:110px}
 .inputs td{padding:0 12px 0 0}
-.inputs input[type=number],.inputs select{width:100%;min-width:200px;border:1px solid var(--line);border-radius:0;padding:3px 8px;background:var(--cell);color:var(--hl);font:inherit;text-transform:inherit;height:28px}
+.inputs input[type=number],.inputs input[type=text],.inputs select{width:100%;min-width:200px;border:1px solid var(--line);border-radius:0;padding:3px 8px;background:var(--cell);color:var(--hl);font:inherit;text-transform:inherit;height:28px}
 .inputs input:focus,.inputs select:focus{outline:1px solid var(--acc);outline-offset:-1px}
 .inputs input.bad{border-color:var(--bad);color:var(--bad)}
 .inputs td.chk{padding:3px 0}
@@ -42,3 +42,6 @@ tr.you td{background:var(--sel);color:var(--hl)}
 .more:hover{color:var(--hl);border-color:var(--muted)}
 ::selection{background:var(--sel)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.cl{position:absolute;z-index:5;left:0;right:12px;top:100%;margin:0;padding:0;list-style:none;max-height:260px;overflow-y:auto;background:var(--cell);border:1px solid var(--acc);border-top:0}
+.cl li{padding:2px 8px;cursor:pointer}
+.cl li.on,.cl li:hover{background:var(--sel);color:var(--hl)}
