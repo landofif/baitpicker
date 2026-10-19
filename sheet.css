@@ -40,6 +40,5 @@ tr.you td{background:var(--sel);color:var(--hl)}
 .fish{color:var(--muted)}
 .more{margin-top:8px;font:inherit;padding:2px 10px;border:1px solid var(--line);border-radius:0;background:var(--bg);color:var(--fg);cursor:pointer}
 .more:hover{color:var(--hl);border-color:var(--muted)}
-.foot{color:var(--muted);max-width:80ch;margin-top:20px}
 ::selection{background:var(--sel)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
