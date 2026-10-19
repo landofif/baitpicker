@@ -33,3 +33,30 @@ function bind(ids,render){
   for(const id of ids)$(id).addEventListener("input",go);
   go();
 }
+// type-to-filter box: the list shows the items whose label contains what was typed; box.value is the picked item's value
+function combo(id,onPick){
+  const el=$(id),ul=document.createElement("ul");ul.className="cl";ul.hidden=true;
+  el.parentNode.style.position="relative";el.parentNode.appendChild(ul);
+  el.setAttribute("autocomplete","off");el.setAttribute("role","combobox");
+  const box={items:[],value:"",hi:0,shown:[]};
+  const label=()=>{const it=box.items.find(i=>i.v===box.value);return it?it.t:"";};
+  const show=all=>{
+    const q=all?"":el.value.trim().toLowerCase();
+    box.shown=box.items.filter(i=>i.t.toLowerCase().includes(q));box.hi=0;
+    ul.innerHTML=box.shown.map((i,k)=>`<li data-k="${k}"${k===0?' class="on"':""}>${i.t.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}</li>`).join("")||'<li class="hint">no match</li>';
+    ul.hidden=false;
+  };
+  const pick=k=>{const it=box.shown[k];if(!it)return;box.value=it.v;el.value=it.t;ul.hidden=true;onPick();};
+  const mark=()=>{[...ul.children].forEach((c,k)=>c.classList.toggle("on",k===box.hi));const c=ul.children[box.hi];if(c&&c.scrollIntoView)c.scrollIntoView({block:"nearest"});};
+  el.addEventListener("focus",()=>{el.select();show(true);});
+  el.addEventListener("input",()=>show(false));
+  el.addEventListener("keydown",e=>{
+    if(e.key==="ArrowDown"||e.key==="ArrowUp"){e.preventDefault();if(ul.hidden)show(false);const n=box.shown.length;if(n){box.hi=(box.hi+(e.key==="ArrowDown"?1:n-1))%n;mark();}}
+    else if(e.key==="Enter"){e.preventDefault();pick(box.hi);}
+    else if(e.key==="Escape"){ul.hidden=true;el.value=label();}
+  });
+  ul.addEventListener("mousedown",e=>{e.preventDefault();const li=e.target.closest("li[data-k]");if(li)pick(+li.dataset.k);});
+  el.addEventListener("blur",()=>{ul.hidden=true;el.value=label();});
+  box.set=v=>{box.value=v;el.value=label();};
+  return box;
+}
