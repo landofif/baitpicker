@@ -1,45 +1,6 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Bait Picker</title>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>bait picker</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<style>
-:root{color-scheme:light dark;--bg:#fff;--fg:#1a1a1a;--muted:#6b6b6b;--line:#d4d4d4;--head:#f3f3f3;--sel:#e8f0fe;--bad:#c5221f;--cell:#fff}
-@media (prefers-color-scheme:dark){:root{--bg:#161616;--fg:#e6e6e6;--muted:#9a9a9a;--line:#3a3a3a;--head:#202020;--sel:#1e2a3d;--bad:#ff6b66;--cell:#161616}}
-*{box-sizing:border-box}
-body{margin:0;padding:16px;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif}
-.wrap{max-width:1000px;margin:0 auto}
-h1{font-size:16px;margin:0 0 12px;font-weight:600}
-.num,td.n,th.n{font-family:ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums}
-nav{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 14px;font-size:13px}
-nav a{color:var(--muted);text-decoration:none}
-nav a:hover{color:var(--fg)}
-nav a[aria-current]{color:var(--fg);font-weight:600}
-table{border-collapse:collapse;width:100%}
-th,td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
-th{background:var(--head);font-weight:600;white-space:nowrap}
-th.n,td.n{text-align:right}
-th.s{cursor:pointer;user-select:none}
-th.s[aria-sort=ascending]::after{content:" \25B2";font-size:10px}
-th.s[aria-sort=descending]::after{content:" \25BC";font-size:10px}
-.inputs{width:auto;margin-bottom:16px}
-.inputs th{width:90px}
-.inputs td{padding:0}
-.inputs input[type=number],.inputs select{width:100%;min-width:200px;border:0;border-radius:0;padding:5px 8px;background:var(--cell);color:var(--fg);font:inherit;height:30px}
-.inputs input:focus,.inputs select:focus{outline:2px solid #1a73e8;outline-offset:-2px}
-.inputs input.bad{background:color-mix(in srgb,var(--bad) 18%,var(--cell));color:var(--bad)}
-.inputs td.chk{padding:5px 8px}
-.inputs td.chk label{margin-right:12px;white-space:nowrap}
-.hint{color:var(--muted);font-size:12px}
-.verdict{margin:0 0 8px}
-.q tbody tr{cursor:pointer}
-.q tbody tr:hover{background:var(--head)}
-.q tbody tr[aria-selected=true]{background:var(--sel)}
-.q tr.top td{font-weight:600}
-.sec{margin:20px 0 6px;font-weight:600}
-.scroll{overflow-x:auto}
-.fish{color:var(--muted);font-size:12px}
-.more{margin-top:8px;font:inherit;padding:4px 10px;border:1px solid var(--line);background:var(--head);color:var(--fg);cursor:pointer}
-.foot{color:var(--muted);font-size:12px;max-width:80ch;margin-top:20px}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-</style></head><body>
+<link rel="stylesheet" href="sheet.css?v=5"></head><body>
 <div class="wrap">
 <nav><a href="index.html" aria-current=page>Bait picker</a><a href="stats.html">Luck, scale, prospect</a><a href="petluck.html">Pet luck</a></nav>
 <h1>Bait Picker <span class="hint">FishOnMC bait odds</span></h1>

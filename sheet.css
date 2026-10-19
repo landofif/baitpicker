@@ -1,28 +1,45 @@
-:root{color-scheme:light dark;--bg:#fff;--fg:#1a1a1a;--muted:#6b6b6b;--line:#d4d4d4;--head:#f3f3f3;--sel:#e8f0fe;--bad:#c5221f;--cell:#fff}
-@media (prefers-color-scheme:dark){:root{--bg:#161616;--fg:#e6e6e6;--muted:#9a9a9a;--line:#3a3a3a;--head:#202020;--sel:#1e2a3d;--bad:#ff6b66;--cell:#161616}}
+:root{color-scheme:dark;--bg:#0c0c0c;--fg:#cccccc;--muted:#767676;--line:#3a3a3a;--head:#0c0c0c;--sel:#1c2b45;--bad:#ff5f56;--cell:#0c0c0c;--acc:#3b9cff;--hl:#f2f2f2}
 *{box-sizing:border-box}
-body{margin:0;padding:16px;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,sans-serif}
+body{text-transform:lowercase;margin:0;padding:16px;background:var(--bg);color:var(--fg);font:14px/1.45 Consolas,"Cascadia Mono",Menlo,"DejaVu Sans Mono",ui-monospace,monospace}
 .wrap{max-width:1000px;margin:0 auto}
-h1{font-size:16px;margin:0 0 12px;font-weight:600}
-nav{display:flex;flex-wrap:wrap;gap:4px 14px;margin:0 0 14px;font-size:13px}
+h1{font-size:14px;margin:0 0 12px;font-weight:400;color:var(--hl)}
+nav{display:flex;flex-wrap:wrap;gap:4px 18px;margin:0 0 14px}
 nav a{color:var(--muted);text-decoration:none}
-nav a:hover{color:var(--fg)}
-nav a[aria-current]{color:var(--fg);font-weight:600}
-td.n,th.n{font-family:ui-monospace,Menlo,Consolas,monospace;font-variant-numeric:tabular-nums;text-align:right}
+nav a:hover{color:var(--hl)}
+nav a[aria-current]{color:var(--hl)}
+nav a[aria-current]::before{content:"> "}
 table{border-collapse:collapse;width:100%}
-th,td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
-th{background:var(--head);font-weight:600;white-space:nowrap}
+th,td{border:0;border-bottom:1px solid var(--line);padding:2px 12px 2px 0;text-align:left;vertical-align:top}
+th{font-weight:400;color:var(--muted);white-space:nowrap}
+th.n,td.n,.num{text-align:right;font-variant-numeric:tabular-nums}
+th.s{cursor:pointer;user-select:none}
+th.s:hover{color:var(--hl)}
+th.s[aria-sort=ascending]::after{content:" \25B2";font-size:10px}
+th.s[aria-sort=descending]::after{content:" \25BC";font-size:10px}
 .inputs{width:auto;margin-bottom:16px}
+.inputs th,.inputs td{border:0}
 .inputs th{width:110px}
-.inputs td{padding:0}
-.inputs input[type=number],.inputs select{width:100%;min-width:200px;border:0;border-radius:0;padding:5px 8px;background:var(--cell);color:var(--fg);font:inherit;height:30px}
-.inputs input:focus,.inputs select:focus{outline:2px solid #1a73e8;outline-offset:-2px}
-.inputs input.bad{background:color-mix(in srgb,var(--bad) 18%,var(--cell));color:var(--bad)}
-.inputs td.chk{padding:5px 8px}
-.inputs td.chk label{margin-right:12px;white-space:nowrap}
-.inputs td.hint{border:0;padding-left:8px}
-.hint{color:var(--muted);font-size:12px}
-.sec{margin:20px 0 6px;font-weight:600}
+.inputs td{padding:0 12px 0 0}
+.inputs input[type=number],.inputs select{width:100%;min-width:200px;border:1px solid var(--line);border-radius:0;padding:3px 8px;background:var(--cell);color:var(--hl);font:inherit;text-transform:inherit;height:28px}
+.inputs input:focus,.inputs select:focus{outline:1px solid var(--acc);outline-offset:-1px}
+.inputs input.bad{border-color:var(--bad);color:var(--bad)}
+.inputs td.chk{padding:3px 0}
+.inputs td.chk label{margin-right:16px;white-space:nowrap}
+.inputs td.hint,.inputs td.hint[style]{border:0;padding-left:0}
+input[type=checkbox]{accent-color:var(--acc)}
+.hint{color:var(--muted)}
+.verdict{margin:0 0 8px;color:var(--hl)}
+.q tbody tr{cursor:pointer}
+.q tbody tr:hover{background:#161616}
+.q tbody tr[aria-selected=true]{background:var(--sel)}
+.q tr.top td{color:var(--hl)}
+.sec{margin:20px 0 6px;color:var(--hl)}
+.sec::before{content:"# "}
 .scroll{overflow-x:auto}
-tr.you td{background:var(--sel);font-weight:600}
-.foot{color:var(--muted);font-size:12px;max-width:80ch;margin-top:20px}
+tr.you td{background:var(--sel);color:var(--hl)}
+.fish{color:var(--muted)}
+.more{margin-top:8px;font:inherit;padding:2px 10px;border:1px solid var(--line);border-radius:0;background:var(--bg);color:var(--fg);cursor:pointer}
+.more:hover{color:var(--hl);border-color:var(--muted)}
+.foot{color:var(--muted);max-width:80ch;margin-top:20px}
+::selection{background:var(--sel)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
