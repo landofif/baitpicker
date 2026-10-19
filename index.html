@@ -18,9 +18,6 @@
 <tr><th scope="row">Options</th><td class="chk"><label><input id="lures" type="checkbox" checked> Lures</label></td></tr>
 </table>
 
-<p class="verdict" id="verdict" aria-live="polite"></p>
-<div class="scroll"><table class="q" id="cmp" aria-label="Quest comparison"></table></div>
-
 <div class="sec" id="listtitle"></div>
 <p class="hint" id="listnote" style="margin:0 0 6px"></p>
 <div class="scroll"><table id="list"></table></div>
@@ -100,7 +97,7 @@ function readNum(id){
   return Math.min(hi,Math.max(lo,isFinite(v)&&raw!==""?v:lo));
 }
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const COLS=[["rk","#",1],["name","Bait",0],["tier","Tier",0],["lik","Lik %",1],["pool","Pool",0],["odds","Odds",1],["up","+ pts",1],["fish","Fish",0]];
+const COLS=[["rk","#",1],["name","Bait",0],["quest","Quest",0],["tier","Tier",0],["lik","Lik %",1],["pool","Pool",0],["odds","Odds",1],["up","+ pts",1],["casts","Casts",1],["fish","Fish",0]];
 
 function saveHash(){
   const p=new URLSearchParams({loc:$("loc").value,luck:$("luck").value,scale:$("scale").value,
@@ -118,48 +115,28 @@ function loadHash(){
 }
 
 function render(){
-  const loc=D.locs.find(l=>l.name===$("loc").value), luck=readNum("luck"), scale=readNum("scale");
-  const lures=$("lures").checked;
-  const lvl=15;
-  const req={};for(const q of QUESTS) req[q]=modelReq(q,lvl);
-  const so=sizeOdds(scale), ro=odds(luck);
-  const adult=so[2], large=so[3];
-
-  const best={};
-  for(const q of ["Rare","Epic","Legendary"]){const c=candidates(loc,luck,QX[q],lures);const base=ro[QX[q]];
-    best[q]=c.length&&c[0].mid>base+.0005?{val:c[0].mid,name:c[0].b.name}:{val:base,name:"no bait beats the base odds"};}
-  const vals={Adult:adult,Large:large,Rare:best.Rare.val,Epic:best.Epic.val,Legendary:best.Legendary.val};
-  const casts={};for(const q of QUESTS) casts[q]=req[q]/vals[q];
-  const known=QUESTS.filter(q=>isFinite(casts[q])&&vals[q]>0);
-  const top=known.length?known.reduce((a,b)=>casts[b]<casts[a]?b:a):Object.keys(vals).reduce((a,b)=>vals[b]>vals[a]?b:a);
-
-  const how=(top==="Adult"||top==="Large")?"no bait":best[top].name;
-  $("verdict").innerHTML=`Fastest quest at ${esc(loc.name)}: <strong>${top}</strong> (${esc(how)}, ${pct(vals[top])} per cast)`;
-
-  $("cmp").innerHTML=`<thead><tr><th>Quest</th><th class="n">Needed</th><th class="n">Per cast</th><th class="n">Casts</th><th>Bait</th></tr></thead><tbody>`+
-    QUESTS.map(q=>`<tr data-q="${q}" tabindex="0" aria-selected="${q===state.quest}"${q===top?' class="top"':""}><td>${q}</td><td class="n">${req[q]}</td><td class="n">${pct(vals[q])}</td><td class="n">${isFinite(casts[q])?Math.round(casts[q]):"-"}</td><td>${q==="Adult"||q==="Large"?"any bait":esc(best[q].name)}</td></tr>`).join("")+`</tbody>`;
-  document.querySelectorAll("#cmp tbody tr").forEach(r=>{
-    const pick=()=>{state.quest=r.dataset.q;state.showAll=false;render();};
-    r.onclick=pick;r.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();pick();}};});
-
-  const q=state.quest;
-  $("listtitle").textContent=q;
-  const L=$("list"), more=$("more");
-  if(q==="Adult"||q==="Large"){
-    $("listnote").textContent=`No bait effect on size. ${pct1(q==="Adult"?adult:large)} of casts.`;
-    L.innerHTML="";more.hidden=true;saveHash();return;
+  const loc=D.locs.find(l=>l.name===$("loc").value), luck=readNum("luck"); readNum("scale");
+  const lures=$("lures").checked, ro=odds(luck);
+  const all=[];
+  for(const q of ["Rare","Epic","Legendary"]){
+    const X=QX[q], need=modelReq(q,15), base=ro[X];
+    for(const r of candidates(loc,luck,X,lures)){
+      if(r.mid-base<.03) continue;
+      all.push({r,q,X,name:r.b.name,tier:TIER[r.b.rar],lik:r.b.lik,pool:poolStr(r.cnt),odds:r.mid,up:r.mid-base,casts:need/r.mid,
+        fish:RL.map((t,k)=>r.names[k].length?t+": "+r.names[k].join(", "):"").filter(Boolean).join(" · ")+(r.alts.length?" · same: "+r.alts.join(", "):"")});
+    }
   }
-  const X=QX[q], c=candidates(loc,luck,X,lures), base=ro[X];
-  $("listnote").textContent=`No bait: ${pct1(base)}. Hidden: under +3 pts. Click a header to sort.`;
-  const rows=c.filter(r=>r.mid-base>=.03).map((r,i)=>({r,rk:i+1,name:r.b.name,tier:TIER[r.b.rar],lik:r.b.lik,pool:poolStr(r.cnt),odds:r.mid,up:r.mid-base,
-    fish:RL.map((t,k)=>r.names[k].length?t+": "+r.names[k].join(", "):"").filter(Boolean).join(" · ")+(r.alts.length?" · same: "+r.alts.join(", "):"")}));
-  rows.sort((a,b)=>{const x=a[state.sort],y=b[state.sort];return (typeof x==="string"?x.localeCompare(y):x-y)*state.dir||a.rk-b.rk;});
-  const lim=state.showAll?rows.length:12;
+  all.sort((a,b)=>a.casts-b.casts||a.name.localeCompare(b.name));
+  all.forEach((x,i)=>x.rk=i+1);
+  $("listtitle").textContent="Bait strategies, fastest quest first";
+  $("listnote").textContent=`No bait: Rare ${pct1(ro[1])}, Epic ${pct1(ro[2])}, Legendary ${pct1(ro[3])}. Casts = needed fish / odds. Hidden: under +3 pts. Click a header to sort.`;
+  const rows=all.slice().sort((a,b)=>{const x=a[state.sort],y=b[state.sort];return (typeof x==="string"?x.localeCompare(y):x-y)*state.dir||a.rk-b.rk;});
+  const lim=state.showAll?rows.length:12, L=$("list"), more=$("more");
   L.innerHTML=`<thead><tr>`+COLS.map(([k,t,n])=>`<th class="s${n?" n":""}" data-k="${k}" tabindex="0"${state.sort===k?` aria-sort="${state.dir>0?"ascending":"descending"}"`:""}>${t}</th>`).join("")+`</tr></thead><tbody>`+
-    (rows.slice(0,lim).map(({r,rk,name,tier,lik,pool,odds,up,fish})=>{const rng=Math.abs(r.ce-r.fl)>.005;
-      return `<tr><td class="n">${rk}</td><td>${esc(name)}${r.b.kind==="lure"?` <span class="hint">lure x${uses(name)}</span>`:""}</td><td>${RL[tier]}</td><td class="n">${lik}</td><td class="n">${pool}</td><td class="n">${rng?pct(r.fl)+" to "+pct(r.ce):pct(r.fl)}</td><td class="n">+${(up*100).toFixed(0)}</td><td class="fish">${esc(fish)}</td></tr>`;}).join("")||`<tr><td colspan="8" class="hint">Nothing beats base odds</td></tr>`)+`</tbody>`;
+    (rows.slice(0,lim).map(x=>{const r=x.r,rng=Math.abs(r.ce-r.fl)>.005;
+      return `<tr><td class="n">${x.rk}</td><td>${esc(x.name)}${r.b.kind==="lure"?` <span class="hint">lure x${uses(x.name)}</span>`:""}</td><td>${x.q}</td><td>${RL[x.tier]}</td><td class="n">${x.lik}</td><td class="n">${x.pool}</td><td class="n">${rng?pct(r.fl)+" to "+pct(r.ce):pct(r.fl)}</td><td class="n">+${(x.up*100).toFixed(0)}</td><td class="n">${Math.round(x.casts)}</td><td class="fish">${esc(x.fish)}</td></tr>`;}).join("")||`<tr><td colspan="10" class="hint">Nothing beats base odds</td></tr>`)+`</tbody>`;
   L.querySelectorAll("th.s").forEach(h=>{
-    const go=()=>{const k=h.dataset.k;if(state.sort===k)state.dir=-state.dir;else{state.sort=k;state.dir=(k==="name"||k==="tier"||k==="pool"||k==="rk")?1:-1;}render();};
+    const go=()=>{const k=h.dataset.k;if(state.sort===k)state.dir=-state.dir;else{state.sort=k;state.dir=(k==="name"||k==="tier"||k==="pool"||k==="rk"||k==="quest"||k==="casts")?1:-1;}render();};
     h.onclick=go;h.onkeydown=e=>{if(e.key==="Enter")go();};});
   if(rows.length>12){more.hidden=false;more.textContent=state.showAll?"Top 12":`All ${rows.length}`;more.onclick=()=>{state.showAll=!state.showAll;render();};}else more.hidden=true;
   saveHash();
